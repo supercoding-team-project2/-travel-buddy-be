@@ -3,11 +3,13 @@ package com.github.travelbuddy.board.dto;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class BoardAllDto {
     private Integer id;
     private String categoryEnum;
