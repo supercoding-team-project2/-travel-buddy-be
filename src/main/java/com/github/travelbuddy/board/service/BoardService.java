@@ -4,24 +4,44 @@ import com.github.travelbuddy.board.dto.BoardAllDto;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BoardService {
     private final BoardRepository boardRepository;
 
-    public List<BoardAllDto> getAllBoards(String category, String sortBy, String order) {
-        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
-        List<Object[]> results = boardRepository.findAllWithRepresentativeImage(category, sort);
+    public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
+        log.info("Category: " + category);
+        log.info("StartDate: " + startDate);
+        log.info("EndDate: " + endDate);
+        log.info("SortBy: " + sortBy);
+        log.info("Order: " + order);
+
+        if (sortBy == null) {
+            sortBy = "createdAt";
+        }
+        if (order == null) {
+            order = "desc";
+        }
+        List<Object[]> results = boardRepository.findAllWithRepresentativeImageAndDateRange(category, startDate, endDate, sortBy, order);
         return results.stream().map(result -> {
-            BoardEntity board = (BoardEntity) result[0];
-            String representativeImage = (String) result[1];
-            return new BoardAllDto(board, representativeImage);
+            Integer id = (Integer) result[0];
+            BoardEntity.Category categoryEnum = BoardEntity.Category.valueOf((String) result[1]);
+            String title = (String) result[2];
+            String summary = (String) result[3];
+            Integer suggestion = (Integer) result[4];
+            String author = (String) result[5];
+            java.sql.Date startAt = (java.sql.Date) result[6];
+            java.sql.Date endAt = (java.sql.Date) result[7];
+            String representativeImage = (String) result[8];
+            return new BoardAllDto(id , categoryEnum, title, summary, suggestion, author, startAt, endAt, representativeImage);
         }).collect(Collectors.toList());
     }
 }
