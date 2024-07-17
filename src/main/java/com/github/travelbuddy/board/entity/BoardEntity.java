@@ -39,9 +39,9 @@ public class BoardEntity {
     private Category category;
 
     @Column(columnDefinition = "int default 0")
-    private Integer like;
+    private Integer suggestion;
 
-    @Column(nullable = false)
+    @Column(name = "created_at",nullable = false)
     private LocalDateTime createdAt;
 
     public enum Category {
