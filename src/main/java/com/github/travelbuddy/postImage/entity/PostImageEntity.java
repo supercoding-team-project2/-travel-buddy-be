@@ -19,7 +19,7 @@ public class PostImageEntity {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    private BoardEntity post;
+    private BoardEntity board;
 
     @Column(nullable = false, length = 255)
     private String name;
