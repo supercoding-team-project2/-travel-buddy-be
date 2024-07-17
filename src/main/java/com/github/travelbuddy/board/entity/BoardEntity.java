@@ -1,9 +1,11 @@
 package com.github.travelbuddy.board.entity;
 
+import com.github.travelbuddy.postImage.entity.PostImageEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -43,6 +45,9 @@ public class BoardEntity {
 
     @Column(name = "created_at",nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "board")
+    private List<PostImageEntity> postImages;
 
     public enum Category {
         REVIEW, COMPANION, GUIDE
