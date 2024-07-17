@@ -30,6 +30,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/user/signup").permitAll()
+                        .requestMatchers("/api/boards").permitAll()
                         .anyRequest().authenticated());
 
         //jwt는 세션을 stateless로 관리
