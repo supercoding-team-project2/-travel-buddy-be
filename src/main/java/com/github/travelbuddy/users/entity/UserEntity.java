@@ -4,14 +4,14 @@ import com.github.travelbuddy.users.enums.Gender;
 import com.github.travelbuddy.users.enums.Role;
 import com.github.travelbuddy.users.enums.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
