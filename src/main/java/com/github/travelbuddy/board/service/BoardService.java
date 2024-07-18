@@ -40,7 +40,7 @@ public class BoardService {
             java.sql.Date startAt = (java.sql.Date) result[5];
             java.sql.Date endAt = (java.sql.Date) result[6];
             String representativeImage = (String) result[7];
-            Integer likeCount = (Integer) result[8];
+            Long likeCount = (Long) result[8];
             return new BoardAllDto(id , categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
         }).collect(Collectors.toList());
     }

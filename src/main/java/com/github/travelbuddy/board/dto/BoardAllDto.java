@@ -19,5 +19,5 @@ public class BoardAllDto {
     private Date startAt;
     private Date endAt;
     private String representativeImage;
-    private Integer likeCount;
+    private Long likeCount;
 }
