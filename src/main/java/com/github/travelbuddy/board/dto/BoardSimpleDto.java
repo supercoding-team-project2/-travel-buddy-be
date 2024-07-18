@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,5 +14,5 @@ public class BoardSimpleDto {
     private String summary;
     private String representativeImage;
     private BoardEntity.Category category;
-    private LocalDateTime createdAt;
+    private String createdAt;
 }
