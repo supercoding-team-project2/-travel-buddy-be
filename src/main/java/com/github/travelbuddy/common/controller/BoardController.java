@@ -2,6 +2,8 @@ package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.board.dto.BoardAllDto;
 import com.github.travelbuddy.board.dto.BoardDetailDto;
+import com.github.travelbuddy.board.dto.BoardSimpleDto;
+import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,5 +31,12 @@ public class BoardController {
     @GetMapping("/{postId}")
     public BoardDetailDto getPostDetails(@PathVariable Integer postId) {
         return boardService.getPostDetails(postId);
+    }
+
+    @GetMapping("/my")
+    public List<BoardSimpleDto> getBoardsByUserAndCategory(
+            @RequestParam Integer userId,
+            @RequestParam BoardEntity.Category category) {
+        return boardService.getBoardsByUserAndCategory(userId, category);
     }
 }
