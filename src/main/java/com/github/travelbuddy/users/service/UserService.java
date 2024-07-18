@@ -68,13 +68,11 @@ public class UserService {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("정보조회할 해당 ID: " + userId + "를 찾을 수 없습니다."));
 
-        UserResponse userResponse = UserResponse.builder()
+        return UserResponse.builder()
                 .email(userEntity.getEmail())
                 .name(userEntity.getName())
                 .residentNum(userEntity.getResidentNum())
                 .gender(userEntity.getGender())
                 .build();
-
-        return userResponse;
     }
 }
