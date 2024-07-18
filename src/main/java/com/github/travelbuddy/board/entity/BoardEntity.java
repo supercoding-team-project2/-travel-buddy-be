@@ -40,9 +40,6 @@ public class BoardEntity {
     @Column(nullable = false)
     private Category category;
 
-    @Column(columnDefinition = "int default 0")
-    private Integer suggestion;
-
     @Column(name = "created_at",nullable = false)
     private LocalDateTime createdAt;
 
