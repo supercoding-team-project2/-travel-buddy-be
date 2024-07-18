@@ -51,4 +51,11 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
                    "WHERE b.id = :postId " +
                    "GROUP BY b.id, b.title, b.summary, b.content, b.category, u.name, r.start_at, r.end_at, l.like_count, pi.url, rd.day, rdp.place_name, rdp.place_category, t.age_min, t.age_max, t.target_number, t.participant_count, t.gender", nativeQuery = true)
     List<Object[]> findPostDetailsById(@Param("postId") Integer postId);
+
+    @Query("SELECT b.id, b.title, b.summary, pi.url, b.category , b.createdAt " +
+            "FROM BoardEntity b " +
+            "LEFT JOIN b.postImages pi ON pi.id = (SELECT MIN(pi2.id) FROM PostImageEntity pi2 WHERE pi2.board.id = b.id)" +
+            "WHERE b.user.id = :userId AND b.category = :category " +
+            "GROUP BY b.id, pi.url")
+    List<Object[]> findBoardsByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category);
 }

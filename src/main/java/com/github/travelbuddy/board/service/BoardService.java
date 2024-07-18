@@ -2,6 +2,8 @@ package com.github.travelbuddy.board.service;
 
 import com.github.travelbuddy.board.dto.BoardAllDto;
 import com.github.travelbuddy.board.dto.BoardDetailDto;
+import com.github.travelbuddy.board.dto.BoardResponseDto;
+import com.github.travelbuddy.board.dto.BoardSimpleDto;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -106,5 +110,37 @@ public class BoardService {
         );
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
+    }
+    public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(Integer userId, BoardEntity.Category category) {
+        List<Object[]> results = boardRepository.findBoardsByUserIdAndCategory(userId, category);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<BoardSimpleDto> boardSimpleDtos =  results.stream().map(result -> new BoardSimpleDto(
+                (Integer) result[0],
+                (String) result[1],
+                (String) result[2],
+                (String) result[3],
+                (BoardEntity.Category) result[4],
+                ((LocalDateTime) result[5]).format(formatter)
+        )).collect(Collectors.toList());
+
+        String message;
+        if (boardSimpleDtos.isEmpty()) {
+            switch (category) {
+                case REVIEW:
+                    message = "아직 작성한 후기가 없습니다.";
+                    break;
+                case COMPANION:
+                    message = "아직 작성한 동행 게시글이 없습니다.";
+                    break;
+                case GUIDE:
+                    message = "아직 작성한 가이드 게시글이 없습니다.";
+                    break;
+                default:
+                    message = "아직 작성한 게시물이 없습니다.";
+            }
+        } else {
+            message = "게시물을 성공정으로 조회했습니다.";
+        }
+        return new BoardResponseDto<>(message , boardSimpleDtos);
     }
 }
