@@ -20,6 +20,7 @@ import java.util.Map;
                         "com.github.travelbuddy.chat.repository",
                         "com.github.travelbuddy.routes.repository",
                         "com.github.travelbuddy.users.repository",
+                "com.github.travelbuddy.postImage.repository"
         },
         entityManagerFactoryRef = "entityManagerFactoryBean1"
 )
@@ -37,7 +38,8 @@ public class JpaConfig {
         em.setPackagesToScan("com.github.travelbuddy.board.entity",
                              "com.github.travelbuddy.chat.entity",
                              "com.github.travelbuddy.routes.entity",
-                             "com.github.travelbuddy.users.entity"
+                             "com.github.travelbuddy.users.entity",
+                "com.github.travelbuddy.postImage.entity"
         );
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
