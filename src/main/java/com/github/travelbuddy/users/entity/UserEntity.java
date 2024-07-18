@@ -28,8 +28,8 @@ public class UserEntity {
     @Column(name = "password", length = 100, nullable = false)
     private String password;
 
-    @Column(name = "resident_num", nullable = false)
-    private Integer residentNum;
+    @Column(name = "resident_num", length = 20, nullable = false)
+    private String residentNum;
 
     @Column(name = "phone_num", length = 20)
     private String phoneNum;
@@ -50,7 +50,6 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    //todo 시간
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

@@ -34,12 +34,14 @@ public class UserService {
                     .body(new SignupResponse("이미 존재하는 이메일입니다."));
         }
 
-        Integer residentNum = signupDto.getResidentNum()%10;
+        String residentNum = signupDto.getResidentNum();
         Gender gender;
-        if(residentNum == 1|| residentNum == 3){
+        char genderChar = residentNum.charAt(6);
+
+        if(genderChar == '1'|| genderChar == '3'){
             gender=Gender.MALE;
         }
-        else if(residentNum == 2|| residentNum == 4){
+        else if(genderChar == '2'|| genderChar == '4'){
             gender=Gender.FEMALE;
         }
         else{
