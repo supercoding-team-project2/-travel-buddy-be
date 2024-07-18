@@ -2,6 +2,7 @@ package com.github.travelbuddy.board.service;
 
 import com.github.travelbuddy.board.dto.BoardAllDto;
 import com.github.travelbuddy.board.dto.BoardDetailDto;
+import com.github.travelbuddy.board.dto.BoardSimpleDto;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -106,5 +108,16 @@ public class BoardService {
         );
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
+    }
+    public List<BoardSimpleDto> getBoardsByUserAndCategory(Integer userId, BoardEntity.Category category) {
+        List<Object[]> results = boardRepository.findBoardsByUserIdAndCategory(userId, category);
+        return results.stream().map(result -> new BoardSimpleDto(
+                (Integer) result[0],
+                (String) result[1],
+                (String) result[2],
+                (String) result[3],
+                (BoardEntity.Category) result[4],
+                (LocalDateTime) result[5]
+        )).collect(Collectors.toList());
     }
 }
