@@ -15,9 +15,9 @@ public class BoardAllDto {
     private BoardEntity.Category categoryEnum;
     private String title;
     private String summary;
-    private Integer suggestion;
     private String author;
     private Date startAt;
     private Date endAt;
     private String representativeImage;
+    private Long likeCount;
 }

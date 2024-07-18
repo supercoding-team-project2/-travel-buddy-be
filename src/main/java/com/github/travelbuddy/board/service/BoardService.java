@@ -36,12 +36,12 @@ public class BoardService {
             BoardEntity.Category categoryEnum = BoardEntity.Category.valueOf((String) result[1]);
             String title = (String) result[2];
             String summary = (String) result[3];
-            Integer suggestion = (Integer) result[4];
-            String author = (String) result[5];
-            java.sql.Date startAt = (java.sql.Date) result[6];
-            java.sql.Date endAt = (java.sql.Date) result[7];
-            String representativeImage = (String) result[8];
-            return new BoardAllDto(id , categoryEnum, title, summary, suggestion, author, startAt, endAt, representativeImage);
+            String author = (String) result[4];
+            java.sql.Date startAt = (java.sql.Date) result[5];
+            java.sql.Date endAt = (java.sql.Date) result[6];
+            String representativeImage = (String) result[7];
+            Long likeCount = (Long) result[8];
+            return new BoardAllDto(id , categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
         }).collect(Collectors.toList());
     }
 }
