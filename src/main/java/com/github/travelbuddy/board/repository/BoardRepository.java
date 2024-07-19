@@ -58,4 +58,17 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
             "WHERE b.user.id = :userId AND b.category = :category " +
             "GROUP BY b.id, pi.url")
     List<Object[]> findBoardsByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category);
+
+    @Query("SELECT b.id, b.category, b.title, b.summary, b.user.name, r.startAt, r.endAt, COUNT(l.id) as likeCount, " +
+           "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +
+           "FROM BoardEntity b JOIN LikesEntity l ON b.id = l.board.id " +
+           "JOIN RouteEntity r ON b.route.id = r.id " +
+           "WHERE l.user.id = :userId " +
+           "AND (:category IS NULL OR b.category = :category) " +
+           "GROUP BY b.id, b.category, b.title, b.summary, b.user.name, r.startAt, r.endAt, b.createdAt " +
+           "ORDER BY " +
+           "CASE WHEN :sortBy = 'createdAt' THEN b.createdAt END DESC, " +
+           "CASE WHEN :sortBy = 'likeCount' THEN COUNT(l.id) END DESC, " +
+           "CASE WHEN :sortBy = 'title' THEN b.title END ASC")
+    List<Object[]> findLikedPostsByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category, @Param("sortBy") String sortBy);
 }
