@@ -2,6 +2,7 @@ package com.github.travelbuddy.users.service;
 
 import com.github.travelbuddy.users.dto.SignupDto;
 import com.github.travelbuddy.users.dto.SignupResponse;
+import com.github.travelbuddy.users.dto.UserResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.enums.Gender;
 import com.github.travelbuddy.users.enums.Role;
@@ -15,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -34,12 +34,14 @@ public class UserService {
                     .body(new SignupResponse("이미 존재하는 이메일입니다."));
         }
 
-        Integer residentNum = signupDto.getResidentNum()%10;
+        String residentNum = signupDto.getResidentNum();
         Gender gender;
-        if(residentNum == 1|| residentNum == 3){
+        char genderChar = residentNum.charAt(6);
+
+        if(genderChar == '1'|| genderChar == '3'){
             gender=Gender.MALE;
         }
-        else if(residentNum == 2|| residentNum == 4){
+        else if(genderChar == '2'|| genderChar == '4'){
             gender=Gender.FEMALE;
         }
         else{
@@ -60,5 +62,17 @@ public class UserService {
 
         userRepository.save(userEntity);
         return ResponseEntity.ok(new SignupResponse("회원가입 완료"));
+    }
+
+    public UserResponse getUserInfo(Integer userId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("정보조회할 해당 ID: " + userId + "를 찾을 수 없습니다."));
+
+        return UserResponse.builder()
+                .email(userEntity.getEmail())
+                .name(userEntity.getName())
+                .residentNum(userEntity.getResidentNum())
+                .gender(userEntity.getGender())
+                .build();
     }
 }

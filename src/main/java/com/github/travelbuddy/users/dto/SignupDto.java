@@ -11,6 +11,6 @@ public class SignupDto {
     private String name;
     private String email;
     private String password;
-    private Integer residentNum;
+    private String residentNum;
     //프로필사진
 }
