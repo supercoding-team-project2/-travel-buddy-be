@@ -143,4 +143,23 @@ public class BoardService {
         }
         return new BoardResponseDto<>(message , boardSimpleDtos);
     }
+
+    public List<BoardAllDto> getLikedPostsByUser(Integer userId, BoardEntity.Category category, String sortBy) {
+        if (sortBy == null) {
+            sortBy = "createdAt";
+        }
+        List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, sortBy);
+        return results.stream().map(result -> {
+            Integer id = (Integer) result[0];
+            BoardEntity.Category categoryEnum = (BoardEntity.Category) result[1];
+            String title = (String) result[2];
+            String summary = (String) result[3];
+            String author = (String) result[4];
+            java.sql.Date startAt = (java.sql.Date) result[5];
+            java.sql.Date endAt = (java.sql.Date) result[6];
+            Long likeCount = (Long) result[7];
+            String representativeImage = (String) result[8];
+            return new BoardAllDto(id, categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
+        }).collect(Collectors.toList());
+    }
 }

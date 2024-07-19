@@ -1,6 +1,7 @@
 package com.github.travelbuddy.board.entity;
 
 import com.github.travelbuddy.postImage.entity.PostImageEntity;
+import com.github.travelbuddy.routes.entity.RouteEntity;
 import com.github.travelbuddy.users.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,9 +25,9 @@ public class BoardEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    // TODO : RouteEntity 작성 후 수정
-    @Column(name = "route_id")
-    private Integer routeId;
+    @ManyToOne
+    @JoinColumn(name = "route_id")
+    private RouteEntity route;
 
     @Column(nullable = false, length = 100)
     private String title;
