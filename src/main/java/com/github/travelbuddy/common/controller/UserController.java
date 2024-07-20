@@ -33,4 +33,9 @@ public class UserController {
         UserResponse response = userService.getUserInfo(userDetails.getUserId());
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/")
+    public ResponseEntity<SignupResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.updateUserInfo(userDetails.getUserId());
+    }
 }
