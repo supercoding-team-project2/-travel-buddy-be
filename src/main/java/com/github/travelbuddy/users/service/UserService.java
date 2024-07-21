@@ -1,8 +1,8 @@
 package com.github.travelbuddy.users.service;
 
 import com.github.travelbuddy.users.dto.SignupDto;
-import com.github.travelbuddy.users.dto.SignupResponse;
 import com.github.travelbuddy.users.dto.UserResponse;
+import com.github.travelbuddy.users.dto.UserInfoResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.enums.Gender;
 import com.github.travelbuddy.users.enums.Role;
@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -24,14 +25,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public ResponseEntity<SignupResponse> signup(SignupDto signupDto) {
+    public ResponseEntity<UserResponse> signup(SignupDto signupDto) {
 
         String email = signupDto.getEmail();
         String password = signupDto.getPassword();
         Boolean isExist = userRepository.existsByEmail(email);
         if(isExist){
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new SignupResponse("이미 존재하는 이메일입니다."));
+                    .body(new UserResponse("이미 존재하는 이메일입니다."));
         }
 
         String residentNum = signupDto.getResidentNum();
@@ -54,6 +55,7 @@ public class UserService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .residentNum(signupDto.getResidentNum())
+                .phoneNum(signupDto.getPhoneNum())
                 .gender(gender)
                 .status(Status.ACTIVE)
                 .role(Role.USER)
@@ -61,18 +63,40 @@ public class UserService {
                 .build();
 
         userRepository.save(userEntity);
-        return ResponseEntity.ok(new SignupResponse("회원가입 완료"));
+        return ResponseEntity.ok(new UserResponse("회원가입 완료"));
     }
 
-    public UserResponse getUserInfo(Integer userId) {
+    public UserInfoResponse getUserInfo(Integer userId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("정보조회할 해당 ID: " + userId + "를 찾을 수 없습니다."));
 
-        return UserResponse.builder()
+        return UserInfoResponse.builder()
                 .email(userEntity.getEmail())
                 .name(userEntity.getName())
                 .residentNum(userEntity.getResidentNum())
                 .gender(userEntity.getGender())
+                .profilePictureUrl(userEntity.getProfilePictureUrl())
                 .build();
+    }
+
+    public ResponseEntity<UserResponse> updateUserInfo(Integer userId, MultipartFile profilePicture ) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(()-> new RuntimeException("정보수정할 해당 ID: "+ userId +"를 찾을 수 없습니다."));
+        userEntity = userEntity.toBuilder()
+                .profilePictureUrl(profilePicture.toString())
+                .build();
+        userRepository.save(userEntity);
+
+        return ResponseEntity.ok(new UserResponse("정보수정 완료"));
+    }
+
+    public ResponseEntity<UserResponse> checkUserExist(String phoneNum) {
+        Boolean isExist = userRepository.existsByPhoneNum(phoneNum);
+        if(isExist){
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new UserResponse("이미 가입된 번호입니다."));
+        }else {
+            return null;
+        }
     }
 }
