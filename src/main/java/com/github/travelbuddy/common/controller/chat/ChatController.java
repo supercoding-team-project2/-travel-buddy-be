@@ -3,6 +3,7 @@ package com.github.travelbuddy.common.controller.chat;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
 import com.github.travelbuddy.chat.service.ChatMessageService;
+import com.github.travelbuddy.users.jwt.JWTUtill;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,21 +22,25 @@ import java.util.List;
 public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageService chatMessageService;
+    private final JWTUtill jwtUtill;
+    private static final String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyMTQwMTQ5NiwiZXhwIjoxNzIxNDE5NDk2fQ.0d10AIQoQ8gvrrsJH0h0xTHGhfWoX9aR2a_8noObWR4";
 
     @MessageMapping("/chat/enter")
     public void processMessage(@Payload ChatMessage chatMessage) {
         log.info("=================== /publish/chat ===================");
+        Integer userId = jwtUtill.getUserId(token);
+        log.info("userId: " + userId);
 
         ChatMessage savedMessage = chatMessageService.save(chatMessage);
         log.info("savedMessage = " + savedMessage);
 
         messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(), // user
+                chatMessage.getRecipientName(), // user
                 "queue/messages",             // destination
                 ChatNotification.builder()    // payload
-                        .id(savedMessage.getId())
-                        .senderId(savedMessage.getSenderId())
-                        .recipientId(savedMessage.getRecipientId())
+                        .id(String.valueOf(savedMessage.getId()))
+                        .senderId(savedMessage.getSenderName())
+                        .recipientId(savedMessage.getRecipientName())
                         .content(savedMessage.getContent())
                         .build()
         );
