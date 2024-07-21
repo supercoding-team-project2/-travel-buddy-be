@@ -1,6 +1,7 @@
 package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.users.dto.*;
+import com.github.travelbuddy.users.service.MessageService;
 import com.github.travelbuddy.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final UserService userService;
+    private final MessageService messageService;
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(SignupDto signupDto){
@@ -30,6 +32,17 @@ public class UserController {
     @PutMapping("/profile-picture")
     public ResponseEntity<UserResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                        @RequestParam("profilePicture") MultipartFile profilePicture) {
-        return userService.updateUserInfo(userDetails.getUserId(),profilePicture);
+        return userService.updateUserInfo(userDetails.getUserId(), profilePicture);
+    }
+
+    @PostMapping("/sms/send")
+    public ResponseEntity<UserResponse> sendSms(@RequestBody SmsRequestDto request){
+        //이미 가입한 유저인지 확인
+        ResponseEntity<UserResponse> response = userService.checkUserExist(request.getPhoneNum());
+        if(response == null){
+            return messageService.sendSms(request.getPhoneNum());
+        }else {
+            return response;
+        }
     }
 }
