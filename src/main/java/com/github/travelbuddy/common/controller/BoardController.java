@@ -77,4 +77,15 @@ public class BoardController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시물 수정 중 오류가 발생했습니다.");
         }
     }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            boardService.deleteBoard(postId, userDetails);
+            return ResponseEntity.status(HttpStatus.OK).body("게시물이 성공적으로 삭제되었습니다.");
+        } catch (IllegalArgumentException e) {
+            log.error("게시물 삭제 중 권한 오류", e);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
 }
