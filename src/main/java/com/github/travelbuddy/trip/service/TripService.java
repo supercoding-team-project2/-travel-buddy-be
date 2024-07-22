@@ -27,4 +27,20 @@ public class TripService {
 
         tripRepository.save(trip);
     }
+
+    @Transactional
+    public void updateTrip(Integer userId, BoardEntity board, Integer ageMin, Integer ageMax, Integer targetNumber, TripEntity.Gender gender) {
+        TripEntity trip = tripRepository.findByBoard(board).orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
+
+        if (!trip.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("여행 정보를 수정할 권한이 없습니다.");
+        }
+
+        trip.setAgeMin(ageMin);
+        trip.setAgeMax(ageMax);
+        trip.setTargetNumber(targetNumber);
+        trip.setGender(gender);
+
+        tripRepository.save(trip);
+    }
 }
