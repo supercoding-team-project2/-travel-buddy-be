@@ -23,6 +23,10 @@ public class S3Service {
         amazonS3Client.putObject(bucket, fileName, file.getInputStream(),getObjectMetadata(file));
         return generateFileURL(fileName);
     }
+    public void deleteFile(String fileUrl) {
+        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+        amazonS3Client.deleteObject(bucket, fileName);
+    }
     private ObjectMetadata getObjectMetadata(MultipartFile file) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
