@@ -65,7 +65,7 @@ public class UserService {
                 .build();
 
         userRepository.save(userEntity);
-        return ResponseEntity.ok(new UserResponse("회원가입 완료"));
+        return ResponseEntity.ok(new UserResponse("회원가입 완료되었습니다."));
     }
 
     public UserInfoResponse getUserInfo(Integer userId) {
@@ -121,9 +121,11 @@ public class UserService {
         }
         String email = request.getEmail();
         UserEntity userEntity = userRepository.findByEmail(email);
-        userEntity.toBuilder()
+        System.out.println(userEntity.getPassword());
+        UserEntity updatedUserEntity = userEntity.toBuilder()
                 .password(bCryptPasswordEncoder.encode(newPassword)).build();
-        userRepository.save(userEntity);
+        System.out.println(updatedUserEntity.getPassword());
+        userRepository.save(updatedUserEntity);
         return ResponseEntity.ok(new UserResponse("비밀번호 변경이 완료되었습니다."));
     }
 }
