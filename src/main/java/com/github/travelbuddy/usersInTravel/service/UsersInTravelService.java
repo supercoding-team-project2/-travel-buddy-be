@@ -38,4 +38,19 @@ public class UsersInTravelService {
         trip.setParticipantCount(trip.getParticipantCount() + 1);
         tripRepository.save(trip);
     }
+
+    @Transactional
+    public void cancelTrip(CustomUserDetails userDetails, Integer tripId) {
+        Integer userId = userDetails.getUserId();
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저 찾을 수 없음"));
+        TripEntity trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("여행 찾을 수 없음"));
+
+        UsersInTravelEntity usersInTravel = usersInTravelRepository.findByUserAndTrip(user, trip)
+                .orElseThrow(() -> new IllegalArgumentException("여행 참여 정보를 찾을 수 없음"));
+
+        usersInTravelRepository.delete(usersInTravel);
+
+        trip.setParticipantCount(trip.getParticipantCount() - 1);
+        tripRepository.save(trip);
+    }
 }
