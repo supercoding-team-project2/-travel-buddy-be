@@ -215,4 +215,46 @@ public class BoardService {
             tripService.createTrip(user, board, createDto.getAgeMin(), createDto.getAgeMax(), createDto.getTargetNumber(), TripEntity.Gender.valueOf(createDto.getGender()));
         }
     }
+
+    @Transactional
+    public void updateBoard(BoardCreateDto updateDto, CustomUserDetails userDetails, Integer postId) throws IOException{
+        Integer userId = userDetails.getUserId();
+        BoardEntity board = boardRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        RouteEntity route = routeRepository.findById(updateDto.getRouteId()).orElseThrow(() -> new IllegalArgumentException("경로 찾을 수 없음"));
+
+        if (!board.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
+        }
+
+        board.setRoute(route);
+        board.setTitle(updateDto.getTitle());
+        board.setSummary(updateDto.getSummary());
+        board.setContent(updateDto.getContent());
+        board.setCategory(updateDto.getCategory());
+        board.setCreatedAt(LocalDateTime.now());
+
+        boardRepository.save(board);
+
+        if (updateDto.getImages() != null) {
+            List<PostImageEntity> existingImages = postImageRepository.findAllByBoard(board);
+            for (PostImageEntity image : existingImages) {
+                s3Service.deleteFile(image.getUrl());
+                postImageRepository.delete(image);
+            }
+
+            for (MultipartFile image : updateDto.getImages()) {
+                String imageUrl = s3Service.uploadFile(image);
+                PostImageEntity postImage = PostImageEntity.builder()
+                        .board(board)
+                        .url(imageUrl)
+                        .build();
+                postImageRepository.save(postImage);
+            }
+        }
+
+        if (updateDto.getCategory() == BoardEntity.Category.COMPANION || updateDto.getCategory() == BoardEntity.Category.GUIDE) {
+            tripService.updateTrip(userId , board, updateDto.getAgeMin(), updateDto.getAgeMax(), updateDto.getTargetNumber(), TripEntity.Gender.valueOf(updateDto.getGender()));
+        }
+    }
 }
