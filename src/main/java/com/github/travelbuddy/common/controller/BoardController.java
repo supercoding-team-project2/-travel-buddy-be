@@ -66,4 +66,15 @@ public class BoardController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시물 등록 중 오류가 발생했습니다.");
         }
     }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updatePost(@AuthenticationPrincipal CustomUserDetails userDetails , @ModelAttribute BoardCreateDto updateDto , @PathVariable Integer postId){
+        try{
+            boardService.updateBoard(updateDto , userDetails , postId);
+            return ResponseEntity.status(HttpStatus.OK).body("게시물이 성공적으로 수정되었습니다.");
+        }catch (IOException e){
+            log.error("게시물 수정중 오류발생",e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시물 수정 중 오류가 발생했습니다.");
+        }
+    }
 }
