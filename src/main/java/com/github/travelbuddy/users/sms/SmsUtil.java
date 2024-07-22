@@ -1,7 +1,5 @@
 package com.github.travelbuddy.users.sms;
 
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
-import com.github.travelbuddy.users.service.MessageService;
 import jakarta.annotation.PostConstruct;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
@@ -29,7 +27,7 @@ public class SmsUtil {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey,apiSecret,"https://api.coolsms.co.kr");
     }
 
-    public SingleMessageSentResponse sendSms(String phoneNumber, String verificationCode) {
+    public void sendSms(String phoneNumber, String verificationCode) {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(phoneNumber);
@@ -37,6 +35,5 @@ public class SmsUtil {
 
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
         System.out.println(response);
-        return response;
     }
 }
