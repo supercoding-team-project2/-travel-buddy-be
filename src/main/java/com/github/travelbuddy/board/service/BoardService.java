@@ -1,15 +1,26 @@
 package com.github.travelbuddy.board.service;
 
-import com.github.travelbuddy.board.dto.BoardAllDto;
-import com.github.travelbuddy.board.dto.BoardDetailDto;
-import com.github.travelbuddy.board.dto.BoardResponseDto;
-import com.github.travelbuddy.board.dto.BoardSimpleDto;
+import com.github.travelbuddy.board.dto.*;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
+import com.github.travelbuddy.common.service.S3Service;
+import com.github.travelbuddy.postImage.entity.PostImageEntity;
+import com.github.travelbuddy.postImage.repository.PostImageRepository;
+import com.github.travelbuddy.routes.entity.RouteEntity;
+import com.github.travelbuddy.routes.repository.RouteRepository;
+import com.github.travelbuddy.trip.entity.TripEntity;
+import com.github.travelbuddy.trip.service.TripService;
+import com.github.travelbuddy.users.dto.CustomUserDetails;
+import com.github.travelbuddy.users.entity.UserEntity;
+import com.github.travelbuddy.users.jwt.JWTUtill;
+import com.github.travelbuddy.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +36,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BoardService {
     private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
+    private final RouteRepository routeRepository;
+    private final PostImageRepository postImageRepository;
+    private final S3Service s3Service;
+    private final TripService tripService;
+    private final JWTUtill jwtUtill;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
         log.info("Category: " + category);
@@ -40,14 +57,15 @@ public class BoardService {
             order = "desc";
         }
         List<Object[]> results = boardRepository.findAllWithRepresentativeImageAndDateRange(category, startDate, endDate, sortBy, order);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
             Integer id = (Integer) result[0];
             BoardEntity.Category categoryEnum = BoardEntity.Category.valueOf((String) result[1]);
             String title = (String) result[2];
             String summary = (String) result[3];
             String author = (String) result[4];
-            java.sql.Date startAt = (java.sql.Date) result[5];
-            java.sql.Date endAt = (java.sql.Date) result[6];
+            String startAt = dateFormat.format((Date) result[5]);
+            String endAt = dateFormat.format((Date) result[6]);
             String representativeImage = (String) result[7];
             Long likeCount = (Long) result[8];
             return new BoardAllDto(id , categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
@@ -149,17 +167,52 @@ public class BoardService {
             sortBy = "createdAt";
         }
         List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, sortBy);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
             Integer id = (Integer) result[0];
             BoardEntity.Category categoryEnum = (BoardEntity.Category) result[1];
             String title = (String) result[2];
             String summary = (String) result[3];
             String author = (String) result[4];
-            java.sql.Date startAt = (java.sql.Date) result[5];
-            java.sql.Date endAt = (java.sql.Date) result[6];
+            String startAt = dateFormat.format((Date) result[5]);
+            String endAt = dateFormat.format((Date) result[6]);
             Long likeCount = (Long) result[7];
             String representativeImage = (String) result[8];
             return new BoardAllDto(id, categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void createBoard(BoardCreateDto createDto, CustomUserDetails userDetails) throws IOException {
+        Integer userId = userDetails.getUserId();
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저 찾을 수 없음"));
+        RouteEntity route = routeRepository.findById(createDto.getRouteId()).orElseThrow(() -> new IllegalArgumentException("경로 찾을 수 없음"));
+
+        BoardEntity board = BoardEntity.builder()
+                .user(user)
+                .route(route)
+                .title(createDto.getTitle())
+                .summary(createDto.getSummary())
+                .content(createDto.getContent())
+                .category(createDto.getCategory())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        boardRepository.save(board);
+
+        if (createDto.getImages() != null) {
+            for (MultipartFile image : createDto.getImages()) {
+                String imageUrl = s3Service.uploadFile(image);
+                PostImageEntity postImage = PostImageEntity.builder()
+                        .board(board)
+                        .url(imageUrl)
+                        .build();
+                postImageRepository.save(postImage);
+            }
+        }
+
+        if (createDto.getCategory() == BoardEntity.Category.COMPANION || createDto.getCategory() == BoardEntity.Category.GUIDE){
+            tripService.createTrip(user, board, createDto.getAgeMin(), createDto.getAgeMax(), createDto.getTargetNumber(), TripEntity.Gender.valueOf(createDto.getGender()));
+        }
     }
 }
