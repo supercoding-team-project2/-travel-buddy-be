@@ -4,6 +4,7 @@ import com.github.travelbuddy.users.dto.*;
 import com.github.travelbuddy.users.service.MessageService;
 import com.github.travelbuddy.users.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,8 +36,8 @@ public class UserController {
         return userService.updateUserInfo(userDetails.getUserId(), profilePicture);
     }
 
-    @PostMapping("/sms/send")
-    public ResponseEntity<UserResponse> sendSms(@RequestBody SmsRequestDto request){
+    @PostMapping("/signup/sms/send")
+    public ResponseEntity<UserResponse> sendSms(@RequestBody SmsSendRequestDto request){
         //이미 가입한 유저인지 확인
         ResponseEntity<UserResponse> response = userService.checkUserExist(request.getPhoneNum());
         if(response == null){
@@ -45,4 +46,17 @@ public class UserController {
             return response;
         }
     }
+
+    //인증번호 확인
+    @GetMapping("/signup/sms/check")
+    public ResponseEntity<UserResponse> checkSms(@RequestBody SmsCheckRequestDto request){
+        Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
+        if(isValid){
+            return ResponseEntity.ok(new UserResponse("인증 성공"));
+        }else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse("인증 실패"));
+        }
+    }
+
+
 }

@@ -1,9 +1,9 @@
 package com.github.travelbuddy.users.service;
 import com.github.travelbuddy.users.dto.UserResponse;
+import com.github.travelbuddy.users.entity.SmsEntity;
+import com.github.travelbuddy.users.repository.SmsRepository;
 import com.github.travelbuddy.users.sms.SmsUtil;
 import lombok.RequiredArgsConstructor;
-import net.nurigo.sdk.message.model.Message;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +14,7 @@ import java.util.Random;
 public class MessageService {
 
     private final SmsUtil smsUtil;
+    private final SmsRepository smsRepository;
 
     private String createRandomNumber() {
         Random rand = new Random();
@@ -28,6 +29,19 @@ public class MessageService {
     public ResponseEntity<UserResponse> sendSms(String phoneNumber) {
         String certificationNumber = createRandomNumber();
         smsUtil.sendSms(phoneNumber, certificationNumber);
-        return ResponseEntity.ok(new UserResponse("인증번호: "+certificationNumber));
+
+        //인증번호 db에 저장
+        smsRepository.save(SmsEntity.builder()
+                .phoneNum(phoneNumber)
+                .code(certificationNumber)
+                .build());
+
+        return ResponseEntity.ok(new UserResponse("인증번호 전송"));
+    }
+
+
+    public Boolean checkSmsCode(String phoneNum, String receivedCode) {
+        String code = smsRepository.findByPhoneNum(phoneNum);
+        return code != null && code.equals(receivedCode);
     }
 }
