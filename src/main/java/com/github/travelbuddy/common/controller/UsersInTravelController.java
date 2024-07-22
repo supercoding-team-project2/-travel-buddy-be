@@ -26,4 +26,15 @@ public class UsersInTravelController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/{tripId}")
+    public ResponseEntity<?> cancelTrip(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Integer tripId) {
+        try {
+            usersInTravelService.cancelTrip(userDetails, tripId);
+            return ResponseEntity.status(HttpStatus.OK).body("여행 참여가 성공적으로 취소되었습니다.");
+        } catch (IllegalArgumentException e) {
+            log.error("여행 참여 취소 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
