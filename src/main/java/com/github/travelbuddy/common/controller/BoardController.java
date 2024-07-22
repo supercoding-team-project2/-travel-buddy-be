@@ -97,4 +97,10 @@ public class BoardController {
         BoardResponseDto<BoardAllDto> participatedTrips = boardService.getParticipatedTripsByUser(userDetails, category, sortBy, order);
         return ResponseEntity.ok(participatedTrips);
     }
+
+    @GetMapping("/top6-categories")
+    public ResponseEntity<BoardMainDto> getTop6BoardsByCategories() {
+        BoardMainDto response = boardService.getTop6BoardsByCategories();
+        return ResponseEntity.ok(response);
+    }
 }
