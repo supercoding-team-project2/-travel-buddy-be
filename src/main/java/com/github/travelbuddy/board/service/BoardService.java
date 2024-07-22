@@ -15,6 +15,7 @@ import com.github.travelbuddy.users.dto.CustomUserDetails;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.repository.UserRepository;
+import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ public class BoardService {
     private final TripRepository tripRepository;
     private final S3Service s3Service;
     private final TripService tripService;
+    private final UsersInTravelRepository usersInTravelRepository;
     private final JWTUtill jwtUtill;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
@@ -275,4 +277,46 @@ public class BoardService {
 
         boardRepository.delete(board);
     }
-}
+
+    public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, String sortBy, String order) {
+        Integer userId = userDetails.getUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        if (sortBy == null) {
+            sortBy = "createdAt";
+        }
+        if (order == null) {
+            order = "desc";
+        }
+
+        if (category.equals(BoardEntity.Category.REVIEW)){
+            String message = "리뷰 카테고리는 조회할 수 없습니다.";
+            return new BoardResponseDto<>(message , null);
+        }
+
+        List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, sortBy, order);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        List<BoardAllDto> participatedTrips = results.stream().map(result -> {
+            BoardEntity board = (BoardEntity) result[0];
+            Long likeCount = (Long) result[1];
+            String startAt = dateFormat.format(board.getRoute().getStartAt());
+            String endAt = dateFormat.format(board.getRoute().getEndAt());
+            return new BoardAllDto(
+                    board.getId(),
+                    board.getCategory(),
+                    board.getTitle(),
+                    board.getSummary(),
+                    board.getUser().getName(),
+                    startAt,
+                    endAt,
+                    board.getPostImages().isEmpty() ? null : board.getPostImages().get(0).getUrl(),
+                    likeCount
+            );
+        }).collect(Collectors.toList());
+
+        String message = participatedTrips.isEmpty() ? "조회할 수 있는 데이터가 없습니다." : "참여한 여행 게시물을 성공적으로 조회했습니다.";
+        return new BoardResponseDto<>(message, participatedTrips);
+        }
+    }
