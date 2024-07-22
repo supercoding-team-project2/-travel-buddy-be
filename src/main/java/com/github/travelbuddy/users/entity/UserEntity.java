@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
@@ -22,7 +21,7 @@ public class UserEntity {
     @Column(name = "name", length = 30, nullable = false)
     private String name;
 
-    @Column(name = "email", length = 40, nullable = false)
+    @Column(name = "email", length = 40, nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", length = 100, nullable = false)
@@ -31,7 +30,7 @@ public class UserEntity {
     @Column(name = "resident_num", length = 20, nullable = false)
     private String residentNum;
 
-    @Column(name = "phone_num", length = 20)
+    @Column(name = "phone_num", length = 20, nullable = false, unique = true)
     private String phoneNum;
 
     @Column(name = "gender", nullable = false)
