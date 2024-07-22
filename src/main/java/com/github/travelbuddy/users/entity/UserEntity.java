@@ -30,7 +30,7 @@ public class UserEntity {
     @Column(name = "resident_num", length = 20, nullable = false)
     private String residentNum;
 
-    @Column(name = "phone_num", length = 20)
+    @Column(name = "phone_num", length = 20, nullable = false, unique = true)
     private String phoneNum;
 
     @Column(name = "gender", nullable = false)
