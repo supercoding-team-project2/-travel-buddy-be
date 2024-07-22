@@ -1,6 +1,7 @@
 package com.github.travelbuddy.users.service;
 
 import com.github.travelbuddy.users.dto.SignupDto;
+import com.github.travelbuddy.users.dto.UpdatePasswordRequest;
 import com.github.travelbuddy.users.dto.UserResponse;
 import com.github.travelbuddy.users.dto.UserInfoResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final MessageService messageService;
 
     public ResponseEntity<UserResponse> signup(SignupDto signupDto) {
 
@@ -98,5 +100,30 @@ public class UserService {
         }else {
             return null;
         }
+    }
+
+    public ResponseEntity<UserResponse> findPassword(String email) {
+        System.out.println(email);
+        UserEntity userEntity = userRepository.findByEmail(email);
+        if(userEntity != null){
+            String phoneNum = userEntity.getPhoneNum();
+            return messageService.sendSms(phoneNum);
+        }else {
+            return null;
+        }
+    }
+
+    public ResponseEntity<UserResponse> updatePassword(UpdatePasswordRequest request) {
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+        if(!newPassword.equals(confirmPassword)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse("비밀번호가 일치하지 않습니다."));
+        }
+        String email = request.getEmail();
+        UserEntity userEntity = userRepository.findByEmail(email);
+        userEntity.toBuilder()
+                .password(bCryptPasswordEncoder.encode(newPassword)).build();
+        userRepository.save(userEntity);
+        return ResponseEntity.ok(new UserResponse("비밀번호 변경이 완료되었습니다."));
     }
 }

@@ -48,7 +48,7 @@ public class UserController {
     }
 
     //인증번호 확인
-    @PostMapping("/signup/sms/check")
+    @PostMapping("/sms-code/check")
     public ResponseEntity<UserResponse> checkSms(@RequestBody SmsCheckRequestDto request){
         Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
         if(isValid){
@@ -58,5 +58,22 @@ public class UserController {
         }
     }
 
+    //비밀번호 찾기
+    //TODO: request수정
+    @PostMapping("/find/password")
+    public ResponseEntity<UserResponse> findPassword(@RequestBody FindPasswordRequest request){
+        ResponseEntity<UserResponse> response = userService.findPassword(request.getEmail());
+        if(response == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse("가입되지 않은 emil입니다."));
+        }else {
+            return response;
+        }
+    }
 
+    //새 비밀번호 생성
+    @PutMapping("/update/password")
+    public ResponseEntity<UserResponse> updatePassword(@RequestBody UpdatePasswordRequest request){
+        ResponseEntity<UserResponse> response = userService.updatePassword(request);
+        return response;
+    }
 }
