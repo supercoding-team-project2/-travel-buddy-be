@@ -22,14 +22,10 @@ import java.util.List;
 public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageService chatMessageService;
-    private final JWTUtill jwtUtill;
-    private static final String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyMTQwMTQ5NiwiZXhwIjoxNzIxNDE5NDk2fQ.0d10AIQoQ8gvrrsJH0h0xTHGhfWoX9aR2a_8noObWR4";
 
     @MessageMapping("/chat/enter")
     public void processMessage(@Payload ChatMessage chatMessage) {
         log.info("=================== /publish/chat ===================");
-        Integer userId = jwtUtill.getUserId(token);
-        log.info("userId: " + userId);
 
         ChatMessage savedMessage = chatMessageService.save(chatMessage);
         log.info("savedMessage = " + savedMessage);
