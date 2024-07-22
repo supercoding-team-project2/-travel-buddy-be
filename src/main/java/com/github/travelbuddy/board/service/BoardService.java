@@ -93,17 +93,17 @@ public class BoardService {
             (String) firstRow[3],
             BoardEntity.Category.valueOf((String) firstRow[4]),
             (String) firstRow[5],
-            ((Number) firstRow[8]).longValue(),
-            results.stream().map(row -> (String) row[9]).distinct().collect(Collectors.toList())
+            ((Number) firstRow[9]).longValue(),
+            results.stream().map(row -> (String) row[10]).distinct().collect(Collectors.toList())
         );
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, List<Map<String, String>>> sortedRouteDetails = new LinkedHashMap<>();
 
         for (Object[] row : results) {
-            String routeDay = dateFormat.format((java.sql.Date) row[10]);
-            String placeName = (String) row[11];
-            String placeCategory = (String) row[12];
+            String routeDay = dateFormat.format((java.sql.Date) row[11]);
+            String placeName = (String) row[12];
+            String placeCategory = (String) row[13];
 
             Map<String, String> placeDetails = new LinkedHashMap<>();
             placeDetails.put("placeName", placeName);
@@ -118,17 +118,19 @@ public class BoardService {
         }
 
         BoardDetailDto.RouteDto routeDto = new BoardDetailDto.RouteDto(
-            (java.sql.Date) firstRow[6],
-            (java.sql.Date) firstRow[7],
-            sortedRouteDetails
+                (Integer) firstRow[6],
+                (java.sql.Date) firstRow[7],
+                (java.sql.Date) firstRow[8],
+                sortedRouteDetails
         );
 
         BoardDetailDto.TripDto tripDto = new BoardDetailDto.TripDto(
-            (Integer) firstRow[13],
-            (Integer) firstRow[14],
-            (Integer) firstRow[15],
-            (Integer) firstRow[16],
-            (String) firstRow[17]
+                (Integer) firstRow[14],
+                (Integer) firstRow[15],
+                (Integer) firstRow[16],
+                (Integer) firstRow[17],
+                (Integer) firstRow[18],
+                (String) firstRow[19]
         );
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
