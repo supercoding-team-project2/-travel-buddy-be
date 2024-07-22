@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/signup").permitAll()
                         .requestMatchers("/api/boards").permitAll()
                         .requestMatchers("/api/boards/*").permitAll()
+                        .requestMatchers("/api/likes/*").permitAll()
                         .requestMatchers("/ws").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JWTFilter(jwtUtill), LoginFilter.class) //loginFilter전에 등록
