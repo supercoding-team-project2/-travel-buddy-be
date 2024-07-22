@@ -72,30 +72,16 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
            "CASE WHEN :sortBy = 'title' THEN b.title END ASC")
     List<Object[]> findLikedPostsByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category, @Param("sortBy") String sortBy);
 
-    @Query("SELECT b.id, b.title, " +
+    @Query("SELECT b.id, b.title, b.createdAt, COUNT(l.id) as likeCount," +
             "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +
-            "FROM BoardEntity b JOIN LikesEntity l ON b.id = l.board.id " +
-            "WHERE b.category = 'REVIEW' " +
-            "GROUP BY b.id, b.title " +
-            "ORDER BY COUNT(l.id) DESC " +
+            "FROM BoardEntity b LEFT JOIN LikesEntity l ON b.id = l.board.id " +
+            "WHERE b.category = :category " +
+            "GROUP BY b.id, b.title, b.createdAt " +
+            "ORDER BY " +
+            "CASE WHEN :sortBy = 'likeCount' THEN COUNT(l.id) END DESC, " +
+            "CASE WHEN :sortBy = 'createdAt' THEN b.createdAt END DESC " +
             "LIMIT 6")
-    List<Object[]> findTop6ReviewBoardsWithRepresentativeImage();
-
-    @Query("SELECT b.id, b.title, " +
-            "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +
-            "FROM BoardEntity b JOIN LikesEntity l ON b.id = l.board.id " +
-            "WHERE b.category = 'GUIDE' " +
-            "GROUP BY b.id, b.title " +
-            "ORDER BY b.createdAt DESC " +
-            "LIMIT 6")
-    List<Object[]> findTop6GuideBoardsWithRepresentativeImage();
-
-    @Query("SELECT b.id, b.title, " +
-            "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +
-            "FROM BoardEntity b JOIN LikesEntity l ON b.id = l.board.id " +
-            "WHERE b.category = 'COMPANION' " +
-            "GROUP BY b.id, b.title " +
-            "ORDER BY b.createdAt DESC " +
-            "LIMIT 6")
-    List<Object[]> findTop6CompanionBoardsWithRepresentativeImage();
+    List<Object[]> findTop6BoardsByCategoryWithRepresentativeImage(
+            @Param("category") BoardEntity.Category category,
+            @Param("sortBy") String sortBy);
 }
