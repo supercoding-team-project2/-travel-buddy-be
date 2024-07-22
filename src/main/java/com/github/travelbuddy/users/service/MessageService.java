@@ -42,6 +42,11 @@ public class MessageService {
 
     public Boolean checkSmsCode(String phoneNum, String receivedCode) {
         String code = smsRepository.findByPhoneNum(phoneNum);
-        return code != null && code.equals(receivedCode);
+        if(code.equals(receivedCode) && code != null) {
+            smsRepository.deleteByPhoneNum(phoneNum);
+            return true;
+        }else {
+            return false;
+        }
     }
 }

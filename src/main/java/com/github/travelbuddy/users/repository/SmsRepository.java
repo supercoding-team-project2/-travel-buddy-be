@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SmsRepository extends JpaRepository<SmsEntity, Integer> {
     String findByPhoneNum(String phoneNum);
+    void deleteByPhoneNum(String phoneNum);
 }
