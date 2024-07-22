@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -16,8 +16,8 @@ public class BoardAllDto {
     private String title;
     private String summary;
     private String author;
-    private Date startAt;
-    private Date endAt;
+    private String startAt;
+    private String endAt;
     private String representativeImage;
     private Long likeCount;
 }
