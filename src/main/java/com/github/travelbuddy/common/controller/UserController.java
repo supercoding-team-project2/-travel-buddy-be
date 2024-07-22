@@ -48,7 +48,7 @@ public class UserController {
     }
 
     //인증번호 확인
-    @GetMapping("/signup/sms/check")
+    @PostMapping("/signup/sms/check")
     public ResponseEntity<UserResponse> checkSms(@RequestBody SmsCheckRequestDto request){
         Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
         if(isValid){
