@@ -319,4 +319,27 @@ public class BoardService {
         String message = participatedTrips.isEmpty() ? "조회할 수 있는 데이터가 없습니다." : "참여한 여행 게시물을 성공적으로 조회했습니다.";
         return new BoardResponseDto<>(message, participatedTrips);
         }
+
+        public BoardMainDto getTop6BoardsByCategories() {
+            List<BoardMainSimpleDto> top6ReviewBoards = getTop6BoardsByCategory(BoardEntity.Category.REVIEW, "likeCount");
+            List<BoardMainSimpleDto> top6GuideBoards = getTop6BoardsByCategory(BoardEntity.Category.GUIDE, "createdAt");
+            List<BoardMainSimpleDto> top6CompanionBoards = getTop6BoardsByCategory(BoardEntity.Category.COMPANION, "createdAt");
+
+            return new BoardMainDto(top6ReviewBoards, top6GuideBoards, top6CompanionBoards);
+        }
+
+        private List<BoardMainSimpleDto> getTop6BoardsByCategory(BoardEntity.Category category, String sortBy) {
+            List<Object[]> results = boardRepository.findTop6BoardsByCategoryWithRepresentativeImage(category, sortBy);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+            return results.stream().map(result -> {
+                Integer id = (Integer) result[0];
+                String title = (String) result[1];
+                String createdAt = ((LocalDateTime) result[2]).format(formatter);
+                Long likeCount = (Long) result[3];
+                String representativeImage = (String) result[4];
+
+                return new BoardMainSimpleDto(id, title, representativeImage, createdAt, likeCount);
+            }).collect(Collectors.toList());
+        }
     }
