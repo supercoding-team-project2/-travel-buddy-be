@@ -60,7 +60,7 @@ public class UserController {
 
     //비밀번호 찾기
     //TODO: request수정
-    @PostMapping("/find/password")
+    @PostMapping("/password/find")
     public ResponseEntity<UserResponse> findPassword(@RequestBody FindPasswordRequest request){
         ResponseEntity<UserResponse> response = userService.findPassword(request.getEmail());
         if(response == null){
@@ -71,7 +71,7 @@ public class UserController {
     }
 
     //새 비밀번호 생성
-    @PutMapping("/update/password")
+    @PutMapping("/password/update")
     public ResponseEntity<UserResponse> updatePassword(@RequestBody UpdatePasswordRequest request){
         ResponseEntity<UserResponse> response = userService.updatePassword(request);
         return response;
