@@ -3,6 +3,7 @@ import com.github.travelbuddy.users.dto.UserResponse;
 import com.github.travelbuddy.users.entity.SmsEntity;
 import com.github.travelbuddy.users.repository.SmsRepository;
 import com.github.travelbuddy.users.sms.SmsUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class MessageService {
         return ResponseEntity.ok(new UserResponse("인증번호 전송"));
     }
 
-
+    @Transactional
     public Boolean checkSmsCode(String phoneNum, String receivedCode) {
         String code = smsRepository.findByPhoneNum(phoneNum);
         if(code.equals(receivedCode) && code != null) {
