@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/boards").permitAll()
                         .requestMatchers("/api/boards/*").permitAll()
                         .requestMatchers("/ws").permitAll()
+                        .requestMatchers("/api/attend/*").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JWTFilter(jwtUtill), LoginFilter.class) //loginFilter전에 등록
                 .sessionManagement((session) -> session

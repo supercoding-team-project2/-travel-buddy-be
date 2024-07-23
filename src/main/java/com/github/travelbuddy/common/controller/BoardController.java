@@ -88,4 +88,19 @@ public class BoardController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
     }
+
+    @GetMapping("/participated")
+    public ResponseEntity<BoardResponseDto<BoardAllDto>> getParticipatedTripsByUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                        @RequestParam(required = false) BoardEntity.Category category,
+                                                                        @RequestParam(required = false) String sortBy,
+                                                                        @RequestParam(required = false) String order) {
+        BoardResponseDto<BoardAllDto> participatedTrips = boardService.getParticipatedTripsByUser(userDetails, category, sortBy, order);
+        return ResponseEntity.ok(participatedTrips);
+    }
+
+    @GetMapping("/top6-categories")
+    public ResponseEntity<BoardMainDto> getTop6BoardsByCategories() {
+        BoardMainDto response = boardService.getTop6BoardsByCategories();
+        return ResponseEntity.ok(response);
+    }
 }
