@@ -137,7 +137,8 @@ public class BoardService {
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
     }
-    public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(Integer userId, BoardEntity.Category category) {
+    public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(CustomUserDetails userDetails, BoardEntity.Category category) {
+        Integer userId = userDetails.getUserId();
         List<Object[]> results = boardRepository.findBoardsByUserIdAndCategory(userId, category);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         List<BoardSimpleDto> boardSimpleDtos =  results.stream().map(result -> new BoardSimpleDto(
@@ -170,7 +171,8 @@ public class BoardService {
         return new BoardResponseDto<>(message , boardSimpleDtos);
     }
 
-    public List<BoardAllDto> getLikedPostsByUser(Integer userId, BoardEntity.Category category, String sortBy) {
+    public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, String sortBy) {
+        Integer userId = userDetails.getUserId();
         if (sortBy == null) {
             sortBy = "createdAt";
         }
