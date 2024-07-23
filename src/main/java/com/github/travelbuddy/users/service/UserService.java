@@ -73,8 +73,6 @@ public class UserService {
                 .residentNum(signupDto.getResidentNum())
                 .phoneNum(signupDto.getPhoneNum())
                 .gender(gender)
-                .status(Status.ACTIVE)
-                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .profilePictureUrl(pictureUrl)
                 .build();
