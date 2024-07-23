@@ -1,5 +1,6 @@
 package com.github.travelbuddy.common.config;
 
+import com.github.travelbuddy.chat.service.ChatUserService;
 import com.github.travelbuddy.users.jwt.JWTFilter;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.jwt.LoginFilter;
@@ -27,6 +28,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtill jwtUtill;
+    private final ChatUserService chatUserService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)throws Exception {
@@ -49,6 +51,8 @@ public class SecurityConfig {
                                 CorsConfiguration configuration = new CorsConfiguration();
 
                                 configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                                // 웹소켓 테스트를 위해 허용
+                                configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
                                 //허용할 method
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
                                 configuration.setAllowCredentials(true);
@@ -77,7 +81,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(jwtUtill), LoginFilter.class) //loginFilter전에 등록
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill, chatUserService);
         loginFilter.setFilterProcessesUrl("/api/user/login");
 
         http
