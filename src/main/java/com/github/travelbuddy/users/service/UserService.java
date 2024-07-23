@@ -13,6 +13,7 @@ import com.github.travelbuddy.users.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,6 +31,9 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final MessageService messageService;
     private final S3Service s3Service;
+
+    @Value("${profile.url}")
+    private String defaultProfileUrl;
 
     public ResponseEntity<UserResponse> signup(SignupDto signupDto) throws IOException {
 
@@ -56,25 +60,11 @@ public class UserService {
         }
         log.info("gender={}",gender);
 
-        if(signupDto.getProfilePicture() == null){
-            //TODO: 기본사진 넣기
-            UserEntity userEntity = UserEntity.builder()
-                    .name(signupDto.getName())
-                    .email(email)
-                    .password(bCryptPasswordEncoder.encode(password))
-                    .residentNum(signupDto.getResidentNum())
-                    .phoneNum(signupDto.getPhoneNum())
-                    .gender(gender)
-                    .status(Status.ACTIVE)
-                    .role(Role.USER)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+        String pictureUrl = defaultProfileUrl;
 
-            userRepository.save(userEntity);
-            return ResponseEntity.ok(new UserResponse("회원가입 완료되었습니다."));
+        if(signupDto.getProfilePicture() != null){
+            pictureUrl = s3Service.uploadFile(signupDto.getProfilePicture());
         }
-
-        String pictureUrl = s3Service.uploadFile(signupDto.getProfilePicture());
 
         UserEntity userEntity = UserEntity.builder()
                 .name(signupDto.getName())
@@ -107,11 +97,13 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<UserResponse> updateUserInfo(Integer userId, MultipartFile profilePicture )throws IOException {
+    public ResponseEntity<?> updateUserInfo(Integer userId, MultipartFile profilePicture )throws IOException {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()-> new RuntimeException("정보수정할 해당 ID: "+ userId +"를 찾을 수 없습니다."));
 
-        s3Service.deleteFile(userEntity.getProfilePictureUrl());
+        if(!userEntity.getProfilePictureUrl().equals(defaultProfileUrl)){
+            s3Service.deleteFile(userEntity.getProfilePictureUrl());
+        }
         String pictureUrl = s3Service.uploadFile(profilePicture);
 
         UserEntity updateUser = userEntity.toBuilder()
@@ -119,7 +111,7 @@ public class UserService {
                 .build();
         userRepository.save(updateUser);
 
-        return ResponseEntity.ok(new UserResponse("정보수정 완료"));
+        return ResponseEntity.ok(pictureUrl);
     }
 
     public ResponseEntity<UserResponse> checkUserExist(String phoneNum) {
