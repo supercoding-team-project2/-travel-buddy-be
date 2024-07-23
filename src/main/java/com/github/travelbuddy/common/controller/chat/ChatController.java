@@ -3,7 +3,6 @@ package com.github.travelbuddy.common.controller.chat;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
 import com.github.travelbuddy.chat.service.ChatMessageService;
-import com.github.travelbuddy.users.jwt.JWTUtill;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
