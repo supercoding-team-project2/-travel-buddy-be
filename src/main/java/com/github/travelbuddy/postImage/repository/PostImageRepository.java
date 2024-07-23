@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface PostImageRepository extends JpaRepository<PostImageEntity , Integer> {
     List<PostImageEntity> findAllByBoard(BoardEntity board);
+
+    void deleteAllByBoard(BoardEntity board);
 }

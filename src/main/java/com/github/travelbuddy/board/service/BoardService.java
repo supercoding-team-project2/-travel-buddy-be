@@ -9,6 +9,7 @@ import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
 import com.github.travelbuddy.routes.repository.RouteRepository;
 import com.github.travelbuddy.trip.entity.TripEntity;
+import com.github.travelbuddy.trip.repository.TripRepository;
 import com.github.travelbuddy.trip.service.TripService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import com.github.travelbuddy.users.entity.UserEntity;
@@ -39,6 +40,7 @@ public class BoardService {
     private final UserRepository userRepository;
     private final RouteRepository routeRepository;
     private final PostImageRepository postImageRepository;
+    private final TripRepository tripRepository;
     private final S3Service s3Service;
     private final TripService tripService;
     private final JWTUtill jwtUtill;
@@ -256,5 +258,21 @@ public class BoardService {
         if (updateDto.getCategory() == BoardEntity.Category.COMPANION || updateDto.getCategory() == BoardEntity.Category.GUIDE) {
             tripService.updateTrip(userId , board, updateDto.getAgeMin(), updateDto.getAgeMax(), updateDto.getTargetNumber(), TripEntity.Gender.valueOf(updateDto.getGender()));
         }
+    }
+
+    @Transactional
+    public void deleteBoard(Integer postId, CustomUserDetails userDetails) {
+        Integer userId = userDetails.getUserId();
+        BoardEntity board = boardRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        if (!board.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("게시글을 삭제할 권한이 없습니다.");
+        }
+
+        postImageRepository.deleteAllByBoard(board);
+
+        tripRepository.deleteByBoard(board);
+
+        boardRepository.delete(board);
     }
 }

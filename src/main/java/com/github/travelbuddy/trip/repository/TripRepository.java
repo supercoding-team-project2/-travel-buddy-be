@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<TripEntity , Integer> {
     Optional<TripEntity> findByBoard(BoardEntity board);
+
+    void deleteByBoard(BoardEntity board);
 }
