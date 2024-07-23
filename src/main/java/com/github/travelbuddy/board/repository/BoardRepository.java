@@ -71,4 +71,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
            "CASE WHEN :sortBy = 'likeCount' THEN COUNT(l.id) END DESC, " +
            "CASE WHEN :sortBy = 'title' THEN b.title END ASC")
     List<Object[]> findLikedPostsByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category, @Param("sortBy") String sortBy);
+
+    @Query("SELECT COUNT(b.id) FROM BoardEntity b WHERE b.user.id = :userId and b.category = :category")
+    Integer countByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category);
 }
