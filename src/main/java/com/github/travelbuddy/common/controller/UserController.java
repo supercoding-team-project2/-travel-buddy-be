@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
@@ -20,7 +22,11 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(SignupDto signupDto){
-        return userService.signup(signupDto);
+        try {
+            return userService.signup(signupDto);
+        }catch (IOException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 
@@ -31,9 +37,13 @@ public class UserController {
     }
 
     @PutMapping("/profile-picture")
-    public ResponseEntity<UserResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                        @RequestParam("profilePicture") MultipartFile profilePicture) {
-        return userService.updateUserInfo(userDetails.getUserId(), profilePicture);
+        try {
+            return userService.updateUserInfo(userDetails.getUserId(), profilePicture);
+        }catch (IOException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PostMapping("/signup/sms/send")

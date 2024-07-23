@@ -84,4 +84,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     List<Object[]> findTop6BoardsByCategoryWithRepresentativeImage(
             @Param("category") BoardEntity.Category category,
             @Param("sortBy") String sortBy);
+
+    @Query("SELECT COUNT(b.id) FROM BoardEntity b WHERE b.user.id = :userId and b.category = :category")
+    Integer countByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category);
 }

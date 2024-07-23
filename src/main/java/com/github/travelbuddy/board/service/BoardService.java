@@ -13,6 +13,7 @@ import com.github.travelbuddy.trip.repository.TripRepository;
 import com.github.travelbuddy.trip.service.TripService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import com.github.travelbuddy.users.entity.UserEntity;
+import com.github.travelbuddy.users.enums.Role;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.repository.UserRepository;
 import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -219,6 +221,19 @@ public class BoardService {
 
         if (createDto.getCategory() == BoardEntity.Category.COMPANION || createDto.getCategory() == BoardEntity.Category.GUIDE){
             tripService.createTrip(user, board, createDto.getAgeMin(), createDto.getAgeMax(), createDto.getTargetNumber(), TripEntity.Gender.valueOf(createDto.getGender()));
+        }
+
+        if(user.getRole().equals(Role.USER)){
+            Integer boardCnt = boardRepository.countByUserIdAndCategory(userId, BoardEntity.Category.COMPANION);
+            LocalDateTime currentTime = LocalDateTime.now();
+            LocalDateTime signupTime = user.getCreatedAt();
+
+            Period signupDuration = Period.between(signupTime.toLocalDate(), currentTime.toLocalDate());
+
+            if(boardCnt >= 20 && signupDuration.toTotalMonths() >= 6){
+                UserEntity updateUser = user.toBuilder().role(Role.ALL).build();
+                userRepository.save(updateUser);
+            }
         }
     }
 

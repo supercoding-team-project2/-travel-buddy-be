@@ -5,6 +5,7 @@ import com.github.travelbuddy.users.enums.Role;
 import com.github.travelbuddy.users.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
+@DynamicInsert
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -37,8 +39,7 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    //todo: 기본 사진
-    @Column(name = "profile_picture_url", length = 255, columnDefinition = "VARCHAR(255) DEFAULT ''")
+    @Column(name = "profile_picture_url", length = 255)
     private String profilePictureUrl;
 
     @Column(name = "status", columnDefinition = "ENUM('ACTIVE', 'DELETED') DEFAULT 'ACTIVE'")

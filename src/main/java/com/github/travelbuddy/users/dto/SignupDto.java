@@ -3,6 +3,7 @@ package com.github.travelbuddy.users.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -13,5 +14,5 @@ public class SignupDto {
     private String password;
     private String residentNum;
     private String phoneNum;
-    //프로필사진
+    private MultipartFile profilePicture;
 }
