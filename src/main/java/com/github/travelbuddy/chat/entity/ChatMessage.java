@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigInteger;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -20,5 +21,5 @@ public class ChatMessage {
     private String senderName;
     private String recipientName;
     private String content;
-//    private Date timestamp;
+    private Date timestamp;
 }
