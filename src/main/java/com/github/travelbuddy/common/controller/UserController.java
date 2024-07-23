@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping("/profile-picture")
-    public ResponseEntity<UserResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                        @RequestParam("profilePicture") MultipartFile profilePicture) {
         try {
             return userService.updateUserInfo(userDetails.getUserId(), profilePicture);
