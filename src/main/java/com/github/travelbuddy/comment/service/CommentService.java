@@ -12,11 +12,14 @@ import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.xml.stream.events.Comment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +29,36 @@ public class CommentService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
 
-    public List<CommentEntity> getAllComments(Integer post_id) {
-        CommentResponse allCommentsResponse = new CommentResponse();
-        List<CommentEntity> comments = commentRepository.findAllByPostId(post_id);
-        return comments;
+    public ApiResponse<?> getAllComments(Integer postId) {
+        boolean isBoardEmpty = boardRepository.findById(postId).isEmpty();
+        log.info("isBoardEmpty: " + isBoardEmpty);
+
+        if (isBoardEmpty) {
+            return ApiResponse.error(ErrorType.BOARD_IS_EMPTY, HttpStatus.BAD_REQUEST);
+        }
+
+        List<CommentResponse> commentResponseList = new ArrayList<>();
+
+        try {
+
+            List<CommentEntity> comments = commentRepository.findAllByPostId(postId);
+            for (CommentEntity commentEntity : comments) {
+                CommentResponse commentResponse = CommentResponse.builder()
+                        .userName(commentEntity.getUser().getName())
+                        .comment(commentEntity.getContent())
+                        .profileImgUrl(commentEntity.getUser().getProfilePictureUrl())
+                        .build();
+
+                commentResponseList.add(commentResponse);
+            }
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return ApiResponse.error(ErrorType.SYSTEM_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return ApiResponse.success(commentResponseList, "COMMENT ITEMS RESPONSE COMPLETE", HttpStatus.OK);
     }
+
 
     public ApiResponse<?> addComment(Integer userId, CommentDTO commentDTO, Integer postId) {
         try {
@@ -48,14 +76,14 @@ public class CommentService {
 
             commentRepository.save(commentEntity);
 
-            return ApiResponse.success("ADD COMMENT COMPLETED");
+            return ApiResponse.success("ADD COMMENT COMPLETED", HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
-            return ApiResponse.error(ErrorType.SYSTEM_ERROR);
+            return ApiResponse.error(ErrorType.SYSTEM_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public ApiResponse<?> modifyComment(int postId, int commentId) {
-        return ApiResponse.success("MODIFY COMPLETED");
+        return ApiResponse.success("MODIFY COMPLETED", HttpStatus.OK);
     }
 }
