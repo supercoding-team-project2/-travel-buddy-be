@@ -25,22 +25,27 @@ public class ChatUserService {
     public void addUser(String token) {
         log.info("=================== ADD CHATUSER ===================");
 
-        Integer userId = jwtUtill.getUserId(token);
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
-        String userName = userEntity.getName();
+        try {
+            Integer userId = jwtUtill.getUserId(token);
+            UserEntity userEntity = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
+            String userName = userEntity.getName();
 
-        boolean isExistChatUser = chatUserRepository.existsByUserName(userName);
+            boolean isExistChatUser = chatUserRepository.existsByUserName(userName);
 
-        if(isExistChatUser) {
-            ChatUser chatUser = chatUserRepository.findByUserName(userName);
-            chatUser.setStatus(Status.ONLINE);
-        }else {
-            ChatUser chatUser = new ChatUser();
-            chatUser.setUserName(userName);
-            chatUser.setStatus(Status.ONLINE);
+            if (isExistChatUser) {
+                ChatUser chatUser = chatUserRepository.findByUserName(userName);
+                chatUser.setStatus(Status.ONLINE);
+            } else {
+                ChatUser chatUser = new ChatUser();
+                chatUser.setUserName(userName);
+                chatUser.setStatus(Status.ONLINE);
 
-            chatUserRepository.save(chatUser);
+                chatUserRepository.save(chatUser);
+            }
+
+        } catch (Exception e) {
+            log.info(e.getMessage());
         }
     }
 
