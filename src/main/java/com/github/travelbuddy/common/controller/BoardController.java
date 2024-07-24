@@ -41,17 +41,17 @@ public class BoardController {
 
     @GetMapping("/my")
     public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(
-            @RequestParam Integer userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false , defaultValue = "REVIEW") BoardEntity.Category category) {
-        return boardService.getBoardsByUserAndCategory(userId, category);
+        return boardService.getBoardsByUserAndCategory(userDetails, category);
     }
 
     @GetMapping("/liked")
     public ResponseEntity<BoardResponseDto<BoardAllDto>> getLikedPostsByUser(
-            @RequestParam Integer userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) BoardEntity.Category category,
             @RequestParam(required = false) String sortBy) {
-        List<BoardAllDto> likedPosts = boardService.getLikedPostsByUser(userId, category, sortBy);
+        List<BoardAllDto> likedPosts = boardService.getLikedPostsByUser(userDetails, category, sortBy);
         String message = likedPosts.isEmpty() ? "추천한 게시물이 없습니다." : "추천한 게시물을 성공적으로 조회했습니다.";
         return ResponseEntity.ok(new BoardResponseDto<>(message, likedPosts));
     }

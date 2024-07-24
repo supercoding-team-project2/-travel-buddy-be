@@ -89,23 +89,24 @@ public class BoardService {
         Object[] firstRow = results.get(0);
 
         BoardDetailDto.BoardDto boardDto = new BoardDetailDto.BoardDto(
-            (Integer) firstRow[0],
-            (String) firstRow[1],
-            (String) firstRow[2],
-            (String) firstRow[3],
-            BoardEntity.Category.valueOf((String) firstRow[4]),
-            (String) firstRow[5],
-            ((Number) firstRow[9]).longValue(),
-            results.stream().map(row -> (String) row[10]).distinct().collect(Collectors.toList())
+                (Integer) firstRow[0],
+                (String) firstRow[1],
+                (String) firstRow[2],
+                (String) firstRow[3],
+                BoardEntity.Category.valueOf((String) firstRow[4]),
+                (String) firstRow[5],
+                (String) firstRow[6],
+                ((Number) firstRow[10]).longValue(),
+                results.stream().map(row -> (String) row[11]).distinct().collect(Collectors.toList())
         );
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, List<Map<String, String>>> sortedRouteDetails = new LinkedHashMap<>();
 
         for (Object[] row : results) {
-            String routeDay = dateFormat.format((java.sql.Date) row[11]);
-            String placeName = (String) row[12];
-            String placeCategory = (String) row[13];
+            String routeDay = dateFormat.format((java.sql.Date) row[12]);
+            String placeName = (String) row[13];
+            String placeCategory = (String) row[14];
 
             Map<String, String> placeDetails = new LinkedHashMap<>();
             placeDetails.put("placeName", placeName);
@@ -120,24 +121,25 @@ public class BoardService {
         }
 
         BoardDetailDto.RouteDto routeDto = new BoardDetailDto.RouteDto(
-                (Integer) firstRow[6],
-                (java.sql.Date) firstRow[7],
+                (Integer) firstRow[7],
                 (java.sql.Date) firstRow[8],
+                (java.sql.Date) firstRow[9],
                 sortedRouteDetails
         );
 
         BoardDetailDto.TripDto tripDto = new BoardDetailDto.TripDto(
-                (Integer) firstRow[14],
                 (Integer) firstRow[15],
                 (Integer) firstRow[16],
                 (Integer) firstRow[17],
                 (Integer) firstRow[18],
-                (String) firstRow[19]
+                (Integer) firstRow[19],
+                (String) firstRow[20]
         );
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
     }
-    public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(Integer userId, BoardEntity.Category category) {
+    public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(CustomUserDetails userDetails, BoardEntity.Category category) {
+        Integer userId = userDetails.getUserId();
         List<Object[]> results = boardRepository.findBoardsByUserIdAndCategory(userId, category);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         List<BoardSimpleDto> boardSimpleDtos =  results.stream().map(result -> new BoardSimpleDto(
@@ -170,7 +172,8 @@ public class BoardService {
         return new BoardResponseDto<>(message , boardSimpleDtos);
     }
 
-    public List<BoardAllDto> getLikedPostsByUser(Integer userId, BoardEntity.Category category, String sortBy) {
+    public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, String sortBy) {
+        Integer userId = userDetails.getUserId();
         if (sortBy == null) {
             sortBy = "createdAt";
         }

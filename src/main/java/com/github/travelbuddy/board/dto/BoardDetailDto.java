@@ -27,6 +27,7 @@ public class BoardDetailDto {
         private String content;
         private BoardEntity.Category category;
         private String author;
+        private String userProfile;
         private Long likeCount;
         private List<String> images;
     }

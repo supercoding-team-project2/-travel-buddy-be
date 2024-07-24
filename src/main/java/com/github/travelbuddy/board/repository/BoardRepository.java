@@ -32,7 +32,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     List<Object[]> findAllWithRepresentativeImageAndDateRange(@Param("category") String category, @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("sortBy") String sortBy, @Param("order") String order);
 
 
-    @Query(value = "SELECT b.id, b.title, b.summary, b.content, b.category, u.name AS author, " +
+    @Query(value = "SELECT b.id, b.title, b.summary, b.content, b.category, u.name AS author, u.profile_picture_url AS userProfile, " +
                    "r.id, r.start_at, r.end_at, " +
                    "COALESCE(l.like_count, 0) AS like_count, " +
                    "pi.url AS image, " +
