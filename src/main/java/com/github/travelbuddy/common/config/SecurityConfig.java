@@ -70,6 +70,7 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable())
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/user/signup").permitAll()
+                        .requestMatchers("/api/user/login").permitAll()
                         .requestMatchers("/api/user/signup/sms/send").permitAll()
                         .requestMatchers("/api/user/sms-code/check").permitAll()
                         .requestMatchers("/api/user/password/*").permitAll()
