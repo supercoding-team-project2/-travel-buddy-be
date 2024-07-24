@@ -56,12 +56,6 @@ public class BoardService {
         log.info("SortBy: " + sortBy);
         log.info("Order: " + order);
 
-        if (sortBy == null) {
-            sortBy = "createdAt";
-        }
-        if (order == null) {
-            order = "desc";
-        }
         List<Object[]> results = boardRepository.findAllWithRepresentativeImageAndDateRange(category, startDate, endDate, sortBy, order);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
@@ -174,9 +168,7 @@ public class BoardService {
 
     public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, String sortBy) {
         Integer userId = userDetails.getUserId();
-        if (sortBy == null) {
-            sortBy = "createdAt";
-        }
+
         List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, sortBy);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
@@ -302,13 +294,6 @@ public class BoardService {
         Integer userId = userDetails.getUserId();
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        if (sortBy == null) {
-            sortBy = "createdAt";
-        }
-        if (order == null) {
-            order = "desc";
-        }
 
         if (category.equals(BoardEntity.Category.REVIEW)){
             String message = "리뷰 카테고리는 조회할 수 없습니다.";
