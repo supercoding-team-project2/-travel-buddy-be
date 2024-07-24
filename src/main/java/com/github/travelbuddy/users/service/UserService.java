@@ -135,16 +135,13 @@ public class UserService {
 
     public ResponseEntity<UserResponse> updatePassword(UpdatePasswordRequest request) {
         String newPassword = request.getNewPassword();
-        String confirmPassword = request.getConfirmPassword();
-        if(!newPassword.equals(confirmPassword)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse("비밀번호가 일치하지 않습니다."));
-        }
         String email = request.getEmail();
+
         UserEntity userEntity = userRepository.findByEmail(email);
-        System.out.println(userEntity.getPassword());
+
         UserEntity updatedUserEntity = userEntity.toBuilder()
                 .password(bCryptPasswordEncoder.encode(newPassword)).build();
-        System.out.println(updatedUserEntity.getPassword());
+
         userRepository.save(updatedUserEntity);
         return ResponseEntity.ok(new UserResponse("비밀번호 변경이 완료되었습니다."));
     }
