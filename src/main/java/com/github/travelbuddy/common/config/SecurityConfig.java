@@ -69,6 +69,10 @@ public class SecurityConfig {
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable())
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/user/signup/sms/send").permitAll()
+                        .requestMatchers("/api/user/signup/sms/check").permitAll()
+                        .requestMatchers("/api/user/sms-code/check").permitAll()
+                        .requestMatchers("/api/user/password/*").permitAll()
                         .requestMatchers("/api/user/*").permitAll()
                         .requestMatchers("/api/user").permitAll()
                         .requestMatchers("/api/boards").permitAll()
