@@ -33,8 +33,8 @@ public class CommentEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-//    @PrePersist
-//    protected void onCreate() {
-//        createdAt = LocalDateTime.now();
-//    }
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

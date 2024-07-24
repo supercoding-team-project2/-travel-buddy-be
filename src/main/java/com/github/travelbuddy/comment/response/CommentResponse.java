@@ -6,9 +6,12 @@ import lombok.*;
 import java.util.List;
 
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentResponse {
-    private int commentCount;
-    private List<CommentEntity> comments;
+    private String comment;
+    private String userName;
+    private String profileImgUrl;
 }
