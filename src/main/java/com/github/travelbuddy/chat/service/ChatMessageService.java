@@ -2,6 +2,7 @@ package com.github.travelbuddy.chat.service;
 
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.repository.ChatMessageRepository;
+import jakarta.websocket.OnOpen;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class ChatMessageService {
     private final ChatRoomService chatRoomService;
 
     public ChatMessage save(ChatMessage chatMessage) {
-        String chatId = chatRoomService.getChatRoomId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true)
+        String chatId = chatRoomService.getChatRoomId(chatMessage.getSenderName(), chatMessage.getRecipientName(), true)
                 .orElseThrow();
         log.info("chatId = " + chatId);
 
