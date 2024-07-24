@@ -35,6 +35,7 @@ public class BoardDetailDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class RouteDto {
+        private Integer id;
         private Date startAt;
         private Date endAt;
         private Map<String, List<Map<String, String>>> routeDetails;
@@ -44,6 +45,7 @@ public class BoardDetailDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class TripDto {
+        private Integer id;
         private Integer ageMin;
         private Integer ageMax;
         private Integer targetNumber;

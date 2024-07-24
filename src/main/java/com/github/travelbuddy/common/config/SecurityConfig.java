@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/likes/*").permitAll()
                         .requestMatchers("/api/comment/*").permitAll()
                         .requestMatchers("/ws").permitAll()
+                        .requestMatchers("/api/attend/*").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JWTFilter(jwtUtill), LoginFilter.class) //loginFilter전에 등록
                 .sessionManagement((session) -> session

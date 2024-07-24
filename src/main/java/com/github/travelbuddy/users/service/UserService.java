@@ -1,5 +1,6 @@
 package com.github.travelbuddy.users.service;
 
+import com.github.travelbuddy.common.service.S3Service;
 import com.github.travelbuddy.users.dto.SignupDto;
 import com.github.travelbuddy.users.dto.UpdatePasswordRequest;
 import com.github.travelbuddy.users.dto.UserResponse;
@@ -9,14 +10,17 @@ import com.github.travelbuddy.users.enums.Gender;
 import com.github.travelbuddy.users.enums.Role;
 import com.github.travelbuddy.users.enums.Status;
 import com.github.travelbuddy.users.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -26,8 +30,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final MessageService messageService;
+    private final S3Service s3Service;
 
-    public ResponseEntity<UserResponse> signup(SignupDto signupDto) {
+    @Value("${profile.url}")
+    private String defaultProfileUrl;
+
+    public ResponseEntity<UserResponse> signup(SignupDto signupDto) throws IOException {
 
         String email = signupDto.getEmail();
         String password = signupDto.getPassword();
@@ -52,6 +60,12 @@ public class UserService {
         }
         log.info("gender={}",gender);
 
+        String pictureUrl = defaultProfileUrl;
+
+        if(signupDto.getProfilePicture() != null){
+            pictureUrl = s3Service.uploadFile(signupDto.getProfilePicture());
+        }
+
         UserEntity userEntity = UserEntity.builder()
                 .name(signupDto.getName())
                 .email(email)
@@ -59,9 +73,8 @@ public class UserService {
                 .residentNum(signupDto.getResidentNum())
                 .phoneNum(signupDto.getPhoneNum())
                 .gender(gender)
-                .status(Status.ACTIVE)
-                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
+                .profilePictureUrl(pictureUrl)
                 .build();
 
         userRepository.save(userEntity);
@@ -81,15 +94,22 @@ public class UserService {
                 .build();
     }
 
-    public ResponseEntity<UserResponse> updateUserInfo(Integer userId, MultipartFile profilePicture ) {
+    @Transactional
+    public ResponseEntity<?> updateUserInfo(Integer userId, MultipartFile profilePicture )throws IOException {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(()-> new RuntimeException("정보수정할 해당 ID: "+ userId +"를 찾을 수 없습니다."));
-        userEntity = userEntity.toBuilder()
-                .profilePictureUrl(profilePicture.toString())
-                .build();
-        userRepository.save(userEntity);
 
-        return ResponseEntity.ok(new UserResponse("정보수정 완료"));
+        if(!userEntity.getProfilePictureUrl().equals(defaultProfileUrl)){
+            s3Service.deleteFile(userEntity.getProfilePictureUrl());
+        }
+        String pictureUrl = s3Service.uploadFile(profilePicture);
+
+        UserEntity updateUser = userEntity.toBuilder()
+                .profilePictureUrl(pictureUrl)
+                .build();
+        userRepository.save(updateUser);
+
+        return ResponseEntity.ok(pictureUrl);
     }
 
     public ResponseEntity<UserResponse> checkUserExist(String phoneNum) {

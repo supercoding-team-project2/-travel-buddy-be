@@ -23,6 +23,7 @@ import java.util.Map;
                 "com.github.travelbuddy.postImage.repository",
                 "com.github.travelbuddy.likes.repository",
                 "com.github.travelbuddy.trip.repository",
+                "com.github.travelbuddy.usersInTravel.repository",
                 "com.github.travelbuddy.comment.repository"
         },
         entityManagerFactoryRef = "entityManagerFactoryBean1"
@@ -45,6 +46,7 @@ public class JpaConfig {
                 "com.github.travelbuddy.postImage.entity",
                 "com.github.travelbuddy.likes.entity",
                 "com.github.travelbuddy.trip.entity",
+                "com.github.travelbuddy.usersInTravel.entity",
                 "com.github.travelbuddy.comment.entity"
         );
 
