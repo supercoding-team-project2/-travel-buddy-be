@@ -1,6 +1,7 @@
 package com.github.travelbuddy.users.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.travelbuddy.chat.service.ChatUserService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtill jwtUtill;
+    private final ChatUserService chatUserService;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -54,6 +56,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String jsonResponse = objectMapper.writeValueAsString(responseBody);
 
             response.setContentType("application/json;charset=UTF-8");
+
+            chatUserService.addUser(token);
 
             response.getWriter().write(jsonResponse);
         }catch (IOException e){

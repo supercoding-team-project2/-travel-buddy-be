@@ -30,12 +30,12 @@ public class ChatController {
         log.info("savedMessage = " + savedMessage);
 
         messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(), // user
+                chatMessage.getRecipientName(), // user
                 "queue/messages",             // destination
                 ChatNotification.builder()    // payload
-                        .id(savedMessage.getId())
-                        .senderId(savedMessage.getSenderId())
-                        .recipientId(savedMessage.getRecipientId())
+                        .id(String.valueOf(savedMessage.getId()))
+                        .senderId(savedMessage.getSenderName())
+                        .recipientId(savedMessage.getRecipientName())
                         .content(savedMessage.getContent())
                         .build()
         );
