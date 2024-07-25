@@ -5,8 +5,10 @@ import com.github.travelbuddy.board.repository.BoardRepository;
 import com.github.travelbuddy.comment.dto.CommentDTO;
 import com.github.travelbuddy.comment.entity.CommentEntity;
 import com.github.travelbuddy.comment.repository.CommentRepository;
+import com.github.travelbuddy.comment.response.AddCommentResponse;
 import com.github.travelbuddy.comment.response.AllCommentResponse;
 import com.github.travelbuddy.comment.response.CommentResponse;
+import com.github.travelbuddy.comment.response.ModifyCommentResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,8 +31,9 @@ public class CommentService {
 
     public ResponseEntity<?> getAllComments(Integer postId) {
         try {
-            boolean isNotExistsBoard = boardRepository.findById(postId).isEmpty();
-            if (isNotExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
+            boolean isExistsBoard = boardRepository.existsById(postId);
+            log.info("isExistsBoard = " + isExistsBoard);
+            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
 
             List<CommentResponse> allCommentResponseList = new ArrayList<>();
             List<CommentEntity> comments = commentRepository.findAllByPostId(postId);
@@ -47,7 +50,7 @@ public class CommentService {
 
             AllCommentResponse allCommentResponse = AllCommentResponse.builder()
                     .postId(postId)
-                    .message("SUCCESS")
+                    .message("GET COMMENTS SUCCESS")
                     .commentList(allCommentResponseList)
                     .build();
 
@@ -67,27 +70,95 @@ public class CommentService {
         }
     }
 
-    public CommentResponse addComment(Integer userId, CommentDTO commentDTO, Integer postId) {
-        boolean isBoardEmpty = boardRepository.findById(postId).isEmpty();
-        log.info("isBoardEmpty: " + isBoardEmpty);
+    public ResponseEntity<?> addComment(Integer userId, CommentDTO commentDTO, Integer postId) {
+        try {
+            boolean isExistsBoard = boardRepository.existsById(postId);
+            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
 
-        if (isBoardEmpty) {
-            throw new IllegalArgumentException("존재하지 않는 게시글입니다.");
+            UserEntity userEntity = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
+
+            BoardEntity boardEntity = boardRepository.findById(postId).get();
+
+            CommentEntity commentEntity = CommentEntity.builder()
+                    .user(userEntity)
+                    .post(boardEntity)
+                    .content(commentDTO.getContent())
+                    .build();
+
+            commentRepository.save(commentEntity);
+
+            AddCommentResponse addCommentResponse = AddCommentResponse.builder()
+                    .postId(postId)
+                    .message("ADD COMMENT COMPLETE")
+                    .commentResponse(new CommentResponse(commentDTO.getContent(), userEntity.getName(), userEntity.getProfilePictureUrl()))
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK).body(addCommentResponse);
+        } catch (IllegalArgumentException ie) {
+            log.info(ie.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ie.getMessage());
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
 
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
+    public ResponseEntity<?> modifyComment(Integer postId, Integer commentId, CommentDTO commentDTO) {
+        try {
+            boolean isExistsBoard = boardRepository.existsById(postId);
+            boolean isExistsComment = commentRepository.existsById(commentId);
+            log.info("isExistsBoard: " + isExistsBoard);
+            log.info("isExistsComment = " + isExistsComment);
 
-        BoardEntity boardEntity = boardRepository.findById(postId).get();
+            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
+            if (!isExistsComment) throw new EntityNotFoundException("존재하지 않는 댓글입니다.");
 
-        CommentEntity commentEntity = CommentEntity.builder()
-                .user(userEntity)
-                .post(boardEntity)
-                .content(commentDTO.getContent())
-                .build();
+            CommentEntity commentEntity = commentRepository.findById(commentId).get();
 
-        commentRepository.save(commentEntity);
+            commentEntity.setContent(commentDTO.getContent());
+            commentRepository.save(commentEntity);
 
-        return new CommentResponse(commentDTO.getContent(), userEntity.getName(), userEntity.getProfilePictureUrl());
+            CommentResponse commentResponse =
+                    new CommentResponse(commentDTO.getContent(), commentEntity.getUser().getName(), commentEntity.getUser().getProfilePictureUrl());
+
+            ModifyCommentResponse modifyCommentResponse = ModifyCommentResponse.builder()
+                    .postId(postId)
+                    .message("MODIFY COMMENT COMPLETED")
+                    .commentResponse(commentResponse)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK).body(modifyCommentResponse);
+        } catch (IllegalArgumentException ie) {
+            log.info(ie.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ie.getMessage());
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> deleteComment(Integer postId, Integer commentId) {
+        try {
+            boolean isExistsBoard = boardRepository.existsById(postId);
+            boolean isExistsComment = commentRepository.existsById(commentId);
+            log.info("isExistsBoard: " + isExistsBoard);
+            log.info("isExistsComment = " + isExistsComment);
+
+            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
+            if (!isExistsComment) throw new EntityNotFoundException("존재하지 않는 댓글입니다.");
+
+            CommentEntity commentEntity = commentRepository.findById(commentId).get();
+
+            commentRepository.delete(commentEntity);
+
+            return ResponseEntity.status(HttpStatus.OK).body("DELETE COMMENT COMPLETED");
+        } catch (IllegalArgumentException ie) {
+            log.info(ie.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ie.getMessage());
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }
