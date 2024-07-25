@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/boards/*").permitAll()
                         .requestMatchers("/api/likes/*").permitAll()
                         .requestMatchers("/api/comment/*").permitAll()
+                        .requestMatchers("/api/routes/*").permitAll()
                         .requestMatchers("/ws").permitAll()
                         .requestMatchers("/api/attend/*").permitAll()
                         .anyRequest().authenticated())
