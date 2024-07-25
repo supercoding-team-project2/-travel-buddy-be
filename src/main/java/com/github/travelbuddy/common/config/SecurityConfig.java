@@ -69,7 +69,6 @@ public class SecurityConfig {
                 .csrf((auth) -> auth.disable())
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable())
-                .oauth2Login(Customizer.withDefaults())
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/user/signup/sms/send").permitAll()
                         .requestMatchers("/api/user/signup/sms/check").permitAll()
