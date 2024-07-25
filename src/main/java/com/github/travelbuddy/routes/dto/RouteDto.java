@@ -15,10 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 public class RouteDto {
 
+    private Integer routeId;
     private String title;
     private String description;
     private Date startAt;
     private Date endAt;
+    private Date createdAt;
 
     private List<RouteDayDto> days;
 

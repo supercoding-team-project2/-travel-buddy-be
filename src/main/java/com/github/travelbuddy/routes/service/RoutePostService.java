@@ -10,32 +10,28 @@ import com.github.travelbuddy.routes.repository.RouteDayPlaceRepository;
 import com.github.travelbuddy.routes.repository.RouteRepository;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
-public class RouteService {
+public class RoutePostService {
 
-    @Autowired
-    private RouteRepository routeRepository;
+    private final RouteRepository routeRepository;
+    private final RouteDayRepository routeDayRepository;
+    private final RouteDayPlaceRepository routeDayPlaceRepository;
+    private final RouteMapper routeMapper;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private RouteDayRepository routeDayRepository;
-
-    @Autowired
-    private RouteDayPlaceRepository routeDayPlaceRepository;
-
-    @Autowired
-    private RouteMapper routeMapper;
-
-    @Autowired
-    private UserRepository userRepository;
+    public RoutePostService(RouteRepository routeRepository, RouteDayRepository routeDayRepository, RouteDayPlaceRepository routeDayPlaceRepository, RouteMapper routeMapper, UserRepository userRepository) {
+        this.routeRepository = routeRepository;
+        this.routeDayRepository = routeDayRepository;
+        this.routeDayPlaceRepository = routeDayPlaceRepository;
+        this.routeMapper = routeMapper;
+        this.userRepository = userRepository;
+    }
 
     public RouteDto createRouteWithDaysAndPlaces(RouteDto routeDto, Integer userId) {
         UserEntity user = userRepository.findById(userId)
@@ -43,7 +39,7 @@ public class RouteService {
 
         RouteEntity route = routeMapper.toRouteEntity(routeDto);
         route.setUser(user);
-        route.setCreatedAt(new Date());
+        route.setCreatedAt(LocalDateTime.now());
         route = routeRepository.save(route);
 
         for (RouteDayEntity routeDay : route.getRouteDays()) {
