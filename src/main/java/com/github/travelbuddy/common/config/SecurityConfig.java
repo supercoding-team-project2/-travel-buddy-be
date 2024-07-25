@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -68,14 +69,14 @@ public class SecurityConfig {
                 .csrf((auth) -> auth.disable())
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable())
+                .oauth2Login(Customizer.withDefaults())
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/user/signup").permitAll()
-                        .requestMatchers("/api/user/login").permitAll()
-                        .requestMatchers("/api/user/profile-picture").permitAll()
-                        .requestMatchers("/api/user").permitAll()
                         .requestMatchers("/api/user/signup/sms/send").permitAll()
+                        .requestMatchers("/api/user/signup/sms/check").permitAll()
                         .requestMatchers("/api/user/sms-code/check").permitAll()
                         .requestMatchers("/api/user/password/*").permitAll()
+                        .requestMatchers("/api/user/*").permitAll()
+                        .requestMatchers("/api/user").permitAll()
                         .requestMatchers("/api/boards").permitAll()
                         .requestMatchers("/api/boards/*").permitAll()
                         .requestMatchers("/api/likes/*").permitAll()

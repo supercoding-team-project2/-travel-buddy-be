@@ -4,6 +4,7 @@ import com.github.travelbuddy.users.dto.*;
 import com.github.travelbuddy.users.service.MessageService;
 import com.github.travelbuddy.users.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
@@ -22,6 +24,7 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(SignupDto signupDto){
+        log.info("회원가입");
         try {
             return userService.signup(signupDto);
         }catch (IOException e){
@@ -29,8 +32,7 @@ public class UserController {
         }
     }
 
-
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UserInfoResponse response = userService.getUserInfo(userDetails.getUserId());
         return ResponseEntity.ok(response);
@@ -48,18 +50,27 @@ public class UserController {
 
     @PostMapping("/signup/sms/send")
     public ResponseEntity<UserResponse> sendSms(@RequestBody SmsSendRequestDto request){
-        //이미 가입한 유저인지 확인
-        ResponseEntity<UserResponse> response = userService.checkUserExist(request.getPhoneNum());
-        if(response == null){
-            return messageService.sendSms(request.getPhoneNum());
-        }else {
-            return response;
+        log.info("회원가입 전 문자인증 코드 발송");
+        return messageService.sendSms(request.getPhoneNum());
+    }
+
+    @PostMapping("/signup/sms/check")
+    public ResponseEntity<UserResponse> checkSmsAndUser(@RequestBody SmsCheckRequestDto request){
+        log.info("회원 가입 전 문자인증 확인과 이미 가입한 유저인지 확인 phone={}, code={}",request.getPhoneNum(),request.getCode());
+        //코드 맞는지 확인과 가입한 유저인지 확인
+        Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
+        if(isValid){
+            //코드가 맞으면 유저있는지 없는지 확인
+            return userService.checkUserExist(request.getPhoneNum());
+        }else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse("인증 실패"));
         }
     }
 
-    //인증번호 확인
+    // 인증번호 확인
     @PostMapping("/sms-code/check")
     public ResponseEntity<UserResponse> checkSms(@RequestBody SmsCheckRequestDto request){
+        log.info("/sms-code/check");
         Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
         if(isValid){
             return ResponseEntity.ok(new UserResponse("인증 성공"));
@@ -69,20 +80,16 @@ public class UserController {
     }
 
     //비밀번호 찾기
-    //TODO: request수정
     @PostMapping("/password/find")
     public ResponseEntity<UserResponse> findPassword(@RequestBody FindPasswordRequest request){
-        ResponseEntity<UserResponse> response = userService.findPassword(request.getEmail());
-        if(response == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse("가입되지 않은 emil입니다."));
-        }else {
-            return response;
-        }
+        log.info("/password/find");
+        return userService.findPassword(request.getEmail(), request.getPhoneNum());
     }
 
     //새 비밀번호 생성
     @PutMapping("/password/update")
     public ResponseEntity<UserResponse> updatePassword(@RequestBody UpdatePasswordRequest request){
+        log.info("/password/update");
         ResponseEntity<UserResponse> response = userService.updatePassword(request);
         return response;
     }

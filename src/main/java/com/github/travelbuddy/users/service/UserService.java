@@ -114,22 +114,21 @@ public class UserService {
 
     public ResponseEntity<UserResponse> checkUserExist(String phoneNum) {
         Boolean isExist = userRepository.existsByPhoneNum(phoneNum);
+        log.info("이미 가입된 번호인지 확인 phoneNum={} isExist={}",phoneNum,isExist);
         if(isExist){
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new UserResponse("이미 가입된 번호입니다."));
         }else {
-            return null;
+            return ResponseEntity.ok(new UserResponse("가입 가능한 번호입니다. 계속해서 회원가입을 진행해 주세요."));
         }
     }
 
-    public ResponseEntity<UserResponse> findPassword(String email) {
-        System.out.println(email);
-        UserEntity userEntity = userRepository.findByEmail(email);
-        if(userEntity != null){
-            String phoneNum = userEntity.getPhoneNum();
+    public ResponseEntity<UserResponse> findPassword(String email, String phoneNum) {
+        Boolean isExist = userRepository.existsByEmailAndPhoneNum(email,phoneNum);
+        if(isExist){
             return messageService.sendSms(phoneNum);
-        }else {
-            return null;
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserResponse("가입되어있지 않은 유저입니다."));
         }
     }
 
