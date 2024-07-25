@@ -56,6 +56,7 @@ public class UserController {
 
     @PostMapping("/signup/sms/check")
     public ResponseEntity<UserResponse> checkSmsAndUser(@RequestBody SmsCheckRequestDto request){
+        log.info("회원 가입 전 문자인증 확인과 이미 가입한 유저인지 확인 phone={}, code={}",request.getPhoneNum(),request.getCode());
         //코드 맞는지 확인과 가입한 유저인지 확인
         Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
         if(isValid){
@@ -69,6 +70,7 @@ public class UserController {
     // 인증번호 확인
     @PostMapping("/sms-code/check")
     public ResponseEntity<UserResponse> checkSms(@RequestBody SmsCheckRequestDto request){
+        log.info("/sms-code/check");
         Boolean isValid = messageService.checkSmsCode(request.getPhoneNum(),request.getCode());
         if(isValid){
             return ResponseEntity.ok(new UserResponse("인증 성공"));
@@ -80,12 +82,14 @@ public class UserController {
     //비밀번호 찾기
     @PostMapping("/password/find")
     public ResponseEntity<UserResponse> findPassword(@RequestBody FindPasswordRequest request){
+        log.info("/password/find");
         return userService.findPassword(request.getEmail(), request.getPhoneNum());
     }
 
     //새 비밀번호 생성
     @PutMapping("/password/update")
     public ResponseEntity<UserResponse> updatePassword(@RequestBody UpdatePasswordRequest request){
+        log.info("/password/update");
         ResponseEntity<UserResponse> response = userService.updatePassword(request);
         return response;
     }

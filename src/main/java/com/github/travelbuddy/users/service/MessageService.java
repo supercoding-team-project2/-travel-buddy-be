@@ -5,11 +5,13 @@ import com.github.travelbuddy.users.repository.SmsRepository;
 import com.github.travelbuddy.users.sms.SmsUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageService {
@@ -43,6 +45,7 @@ public class MessageService {
     @Transactional
     public Boolean checkSmsCode(String phoneNum, String receivedCode) {
         String code = smsRepository.findByPhoneNum(phoneNum);
+        log.info("코드가 일치하는 지 확인 receivedCode={} , code ={} ", receivedCode, code);
         if(code.equals(receivedCode) && code != null) {
             smsRepository.deleteByPhoneNum(phoneNum);
             return true;
