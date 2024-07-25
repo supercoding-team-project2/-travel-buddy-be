@@ -114,6 +114,7 @@ public class UserService {
 
     public ResponseEntity<UserResponse> checkUserExist(String phoneNum) {
         Boolean isExist = userRepository.existsByPhoneNum(phoneNum);
+        log.info("이미 가입된 번호인지 확인 phoneNum={} isExist={}",phoneNum,isExist);
         if(isExist){
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new UserResponse("이미 가입된 번호입니다."));
