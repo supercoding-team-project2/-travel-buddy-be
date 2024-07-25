@@ -1,4 +1,4 @@
-package com.github.travelbuddy.routes.controller;
+package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.routes.dto.RouteDto;
 import com.github.travelbuddy.routes.dto.RoutePutDto;

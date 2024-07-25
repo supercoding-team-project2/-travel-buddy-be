@@ -28,6 +28,7 @@ public class RouteMapper {
 
     public RouteDto toRouteDto(RouteEntity routeEntity) {
         RouteDto routeDto = new RouteDto();
+        routeDto.setRouteId(routeEntity.getId());
         routeDto.setTitle(routeEntity.getTitle());
         routeDto.setDescription(routeEntity.getDescription());
         routeDto.setStartAt(routeEntity.getStartAt());
@@ -56,7 +57,7 @@ public class RouteMapper {
         return routeDay;
     }
 
-    private RouteDto.RouteDayDto toRouteDayDto(RouteDayEntity routeDayEntity) {
+    public RouteDto.RouteDayDto toRouteDayDto(RouteDayEntity routeDayEntity) {
         RouteDto.RouteDayDto routeDayDto = new RouteDto.RouteDayDto();
         routeDayDto.setDay(routeDayEntity.getDay());
         routeDayDto.setPlaces(routeDayEntity.getRouteDayPlaces().stream()
