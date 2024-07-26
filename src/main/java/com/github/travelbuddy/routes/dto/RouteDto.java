@@ -1,26 +1,24 @@
 package com.github.travelbuddy.routes.dto;
 
 import com.github.travelbuddy.routes.enums.PlaceCategory;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RouteDto {
 
     private Integer routeId;
     private String title;
     private String description;
-    private Date startAt;
-    private Date endAt;
-    private Date createdAt;
+    private String startAt;
+    private String endAt;
+    private LocalDateTime createdAt;
 
     private List<RouteDayDto> days;
 
@@ -28,8 +26,9 @@ public class RouteDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class RouteDayDto {
-        private Date day;
+        private String day;
         private List<RouteDayPlaceDto> places;
     }
 
@@ -37,6 +36,7 @@ public class RouteDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class RouteDayPlaceDto {
         private String placeName;
         private PlaceCategory placeCategory;
