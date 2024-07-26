@@ -13,8 +13,6 @@ import com.github.travelbuddy.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 @Transactional
 public class RoutePostService {
@@ -39,12 +37,11 @@ public class RoutePostService {
 
         RouteEntity route = routeMapper.toRouteEntity(routeDto);
         route.setUser(user);
-        route.setCreatedAt(LocalDateTime.now());
         route = routeRepository.save(route);
 
         for (RouteDayEntity routeDay : route.getRouteDays()) {
             routeDay.setRoute(route);
-            routeDayRepository.save(routeDay);
+            routeDay = routeDayRepository.save(routeDay);
             for (RouteDayPlaceEntity routeDayPlace : routeDay.getRouteDayPlaces()) {
                 routeDayPlace.setRouteDay(routeDay);
                 routeDayPlaceRepository.save(routeDayPlace);
