@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,9 +22,9 @@ public class UsersInTravelController {
         try {
             usersInTravelService.attendTrip(userDetails, tripId);
             return ResponseEntity.status(HttpStatus.OK).body("여행에 성공적으로 참여했습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResponseStatusException e) {
             log.error("여행 참여 중 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
     }
 
@@ -32,9 +33,9 @@ public class UsersInTravelController {
         try {
             usersInTravelService.cancelTrip(userDetails, tripId);
             return ResponseEntity.status(HttpStatus.OK).body("여행 참여가 성공적으로 취소되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResponseStatusException e) {
             log.error("여행 참여 취소 중 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
     }
 }
