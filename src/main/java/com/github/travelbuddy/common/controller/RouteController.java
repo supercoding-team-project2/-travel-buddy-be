@@ -57,7 +57,7 @@ public class RouteController {
                 throw new IllegalArgumentException("잘못된 요청입니다.");
             }
         } catch (Exception e) {
-            log.error("오류 발생: ", e);
+            log.error("오류 발생: ", e );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
