@@ -8,8 +8,10 @@ import com.github.travelbuddy.users.repository.UserRepository;
 import com.github.travelbuddy.usersInTravel.entity.UsersInTravelEntity;
 import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +23,14 @@ public class UsersInTravelService {
     @Transactional
     public void attendTrip(CustomUserDetails userDetails , Integer tripId) {
         Integer userId = userDetails.getUserId();
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저 찾을 수 없음"));
-        TripEntity trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("여행 찾을 수 없음"));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저 찾을 수 없음"));
+        TripEntity trip = tripRepository.findById(tripId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"여행 찾을 수 없음"));
+        if(userId.equals(trip.getUser().getId())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "작성자는 참여신청을 할 수 없습니다.");
+        }
 
         if (trip.getParticipantCount() >= trip.getTargetNumber()) {
-            throw new IllegalArgumentException("참여 인원이 이미 가득 찼습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"참여 인원이 이미 가득 찼습니다.");
         }
 
         UsersInTravelEntity usersInTravel = UsersInTravelEntity.builder()
@@ -42,11 +47,11 @@ public class UsersInTravelService {
     @Transactional
     public void cancelTrip(CustomUserDetails userDetails, Integer tripId) {
         Integer userId = userDetails.getUserId();
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저 찾을 수 없음"));
-        TripEntity trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("여행 찾을 수 없음"));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저 찾을 수 없음"));
+        TripEntity trip = tripRepository.findById(tripId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"여행 찾을 수 없음"));
 
         UsersInTravelEntity usersInTravel = usersInTravelRepository.findByUserAndTrip(user, trip)
-                .orElseThrow(() -> new IllegalArgumentException("여행 참여 정보를 찾을 수 없음"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"여행 참여 정보를 찾을 수 없음"));
 
         usersInTravelRepository.delete(usersInTravel);
 
