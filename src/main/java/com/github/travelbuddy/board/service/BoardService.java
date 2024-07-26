@@ -14,7 +14,6 @@ import com.github.travelbuddy.trip.service.TripService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.enums.Role;
-import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.repository.UserRepository;
 import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +46,6 @@ public class BoardService {
     private final S3Service s3Service;
     private final TripService tripService;
     private final UsersInTravelRepository usersInTravelRepository;
-    private final JWTUtill jwtUtill;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
         log.info("Category: " + category);
