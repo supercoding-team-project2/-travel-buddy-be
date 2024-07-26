@@ -83,7 +83,7 @@ public class RouteController {
                 Map<String, String> response = new HashMap<>();
                 response.put("error", "게시물이 있는 여행 경로입니다.");
                 response.put("boardTitles", boardTitles);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             }
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();
