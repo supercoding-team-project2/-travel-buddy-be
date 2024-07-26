@@ -69,6 +69,7 @@ public class RouteController {
 
     @DeleteMapping("/delete/{routeId}")
     public ResponseEntity<Map<String, String>> deleteRoute(@PathVariable Integer routeId) {
+        Map<String, String> response = new HashMap<>();
         try {
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Integer userId = userDetails.getUserId();
@@ -76,22 +77,21 @@ public class RouteController {
             String boardTitles = routeDeleteService.deleteRoute(routeId, userId);
 
             if (boardTitles == null) {
-                Map<String, String> response = new HashMap<>();
                 response.put("message", "성공적으로 삭제되었습니다.");
                 return ResponseEntity.ok(response);
             } else {
-                Map<String, String> response = new HashMap<>();
                 response.put("message", "게시물이 있는 여행 경로입니다.");
                 response.put("boardTitles", boardTitles);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
             }
+        } catch (SecurityException se) {
+            response.put("error", "삭제 권한이 없습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
             response.put("error", "요청 처리 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
     @DeleteMapping("/delete-boards/{routeId}")
     public ResponseEntity<String> deleteRouteWithBoards(@PathVariable Integer routeId) {
