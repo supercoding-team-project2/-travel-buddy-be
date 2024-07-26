@@ -4,6 +4,7 @@ import com.github.travelbuddy.board.dto.*;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
 import com.github.travelbuddy.common.service.S3Service;
+import com.github.travelbuddy.common.util.UUIDUtil;
 import com.github.travelbuddy.postImage.entity.PostImageEntity;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
@@ -79,6 +80,7 @@ public class BoardService {
         }
 
         Object[] firstRow = results.get(0);
+        String authorUUID = UUIDUtil.generateUUIDFromUserId((Integer) firstRow[5]);
 
         BoardDetailDto.BoardDto boardDto = new BoardDetailDto.BoardDto(
                 (Integer) firstRow[0],
@@ -86,19 +88,20 @@ public class BoardService {
                 (String) firstRow[2],
                 (String) firstRow[3],
                 BoardEntity.Category.valueOf((String) firstRow[4]),
-                (String) firstRow[5],
+                authorUUID,
                 (String) firstRow[6],
-                ((Number) firstRow[10]).longValue(),
-                results.stream().map(row -> (String) row[11]).distinct().collect(Collectors.toList())
+                (String) firstRow[7],
+                ((Number) firstRow[11]).longValue(),
+                results.stream().map(row -> (String) row[12]).distinct().collect(Collectors.toList())
         );
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, List<Map<String, String>>> sortedRouteDetails = new LinkedHashMap<>();
 
         for (Object[] row : results) {
-            String routeDay = dateFormat.format((java.sql.Date) row[12]);
-            String placeName = (String) row[13];
-            String placeCategory = (String) row[14];
+            String routeDay = dateFormat.format((java.sql.Date) row[13]);
+            String placeName = (String) row[14];
+            String placeCategory = (String) row[15];
 
             Map<String, String> placeDetails = new LinkedHashMap<>();
             placeDetails.put("placeName", placeName);
@@ -113,19 +116,19 @@ public class BoardService {
         }
 
         BoardDetailDto.RouteDto routeDto = new BoardDetailDto.RouteDto(
-                (Integer) firstRow[7],
-                (java.sql.Date) firstRow[8],
+                (Integer) firstRow[8],
                 (java.sql.Date) firstRow[9],
+                (java.sql.Date) firstRow[10],
                 sortedRouteDetails
         );
 
         BoardDetailDto.TripDto tripDto = new BoardDetailDto.TripDto(
-                (Integer) firstRow[15],
                 (Integer) firstRow[16],
                 (Integer) firstRow[17],
                 (Integer) firstRow[18],
                 (Integer) firstRow[19],
-                (String) firstRow[20]
+                (Integer) firstRow[20],
+                (String) firstRow[21]
         );
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
