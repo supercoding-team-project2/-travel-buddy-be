@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.Date;
@@ -35,15 +36,23 @@ public class BoardController {
     }
 
     @GetMapping("/{postId}")
-    public BoardDetailDto getPostDetails(@PathVariable Integer postId) {
-        return boardService.getPostDetails(postId);
+    public ResponseEntity<?> getPostDetails(@PathVariable Integer postId) {
+        try{
+            BoardDetailDto boardDetailDto =  boardService.getPostDetails(postId);
+            return ResponseEntity.status(HttpStatus.OK).body(boardDetailDto);
+        }catch (ResponseStatusException e){
+            log.error("게시물 상세정보 조회 중 에러 발생" , e);
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+
+        }
     }
 
     @GetMapping("/my")
-    public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(
+    public ResponseEntity<?> getBoardsByUserAndCategory(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false , defaultValue = "REVIEW") BoardEntity.Category category) {
-        return boardService.getBoardsByUserAndCategory(userDetails, category);
+            BoardResponseDto<BoardSimpleDto> results = boardService.getBoardsByUserAndCategory(userDetails, category);
+            return ResponseEntity.status(HttpStatus.OK).body(results);
     }
 
     @GetMapping("/liked")

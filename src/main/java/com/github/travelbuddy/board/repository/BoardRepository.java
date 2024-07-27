@@ -32,7 +32,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     List<Object[]> findAllWithRepresentativeImageAndDateRange(@Param("category") String category, @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("sortBy") String sortBy, @Param("order") String order);
 
 
-    @Query(value = "SELECT b.id, b.title, b.summary, b.content, b.category, u.name AS author, u.profile_picture_url AS userProfile, " +
+    @Query(value = "SELECT b.id, b.title, b.summary, b.content, b.category, u.id, u.name AS author, u.profile_picture_url AS userProfile, " +
                    "r.id, r.start_at, r.end_at, " +
                    "COALESCE(l.like_count, 0) AS like_count, " +
                    "pi.url AS image, " +
@@ -49,7 +49,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
                    "LEFT JOIN routes_day_place rdp ON rd.id = rdp.routes_day_id " +
                    "LEFT JOIN trips t ON b.id = t.post_id " +
                    "WHERE b.id = :postId " +
-                   "GROUP BY b.id, b.title, b.summary, b.content, b.category, u.name, r.id, r.start_at, r.end_at, l.like_count, pi.url, rd.day, rdp.place_name, rdp.place_category, t.id, t.age_min, t.age_max, t.target_number, t.participant_count, t.gender", nativeQuery = true)
+                   "GROUP BY b.id, b.title, b.summary, b.content, b.category, u.id, u.name, r.id, r.start_at, r.end_at, l.like_count, pi.url, rd.day, rdp.place_name, rdp.place_category, t.id, t.age_min, t.age_max, t.target_number, t.participant_count, t.gender", nativeQuery = true)
     List<Object[]> findPostDetailsById(@Param("postId") Integer postId);
 
     @Query("SELECT b.id, b.title, b.summary, pi.url, b.category , b.createdAt " +
