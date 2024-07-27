@@ -3,7 +3,10 @@ package com.github.travelbuddy.board.service;
 import com.github.travelbuddy.board.dto.*;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
+import com.github.travelbuddy.comment.repository.CommentRepository;
 import com.github.travelbuddy.common.service.S3Service;
+import com.github.travelbuddy.common.util.UUIDUtil;
+import com.github.travelbuddy.likes.repository.LikesRepository;
 import com.github.travelbuddy.postImage.entity.PostImageEntity;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
@@ -14,14 +17,15 @@ import com.github.travelbuddy.trip.service.TripService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.enums.Role;
-import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.repository.UserRepository;
 import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -47,7 +51,8 @@ public class BoardService {
     private final S3Service s3Service;
     private final TripService tripService;
     private final UsersInTravelRepository usersInTravelRepository;
-    private final JWTUtill jwtUtill;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
         log.info("Category: " + category);
@@ -77,10 +82,11 @@ public class BoardService {
 
         if (results == null || results.isEmpty()) {
             log.error("No query result found for postId: " + postId);
-            throw new IllegalArgumentException("No query result found for postId: " + postId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물의 관련된 정보를 찾을 수 없습니다.");
         }
 
         Object[] firstRow = results.get(0);
+        String authorUUID = UUIDUtil.generateUUIDFromUserId((Integer) firstRow[5]);
 
         BoardDetailDto.BoardDto boardDto = new BoardDetailDto.BoardDto(
                 (Integer) firstRow[0],
@@ -88,19 +94,20 @@ public class BoardService {
                 (String) firstRow[2],
                 (String) firstRow[3],
                 BoardEntity.Category.valueOf((String) firstRow[4]),
-                (String) firstRow[5],
+                authorUUID,
                 (String) firstRow[6],
-                ((Number) firstRow[10]).longValue(),
-                results.stream().map(row -> (String) row[11]).distinct().collect(Collectors.toList())
+                (String) firstRow[7],
+                ((Number) firstRow[11]).longValue(),
+                results.stream().map(row -> (String) row[12]).distinct().collect(Collectors.toList())
         );
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, List<Map<String, String>>> sortedRouteDetails = new LinkedHashMap<>();
 
         for (Object[] row : results) {
-            String routeDay = dateFormat.format((java.sql.Date) row[12]);
-            String placeName = (String) row[13];
-            String placeCategory = (String) row[14];
+            String routeDay = dateFormat.format((java.sql.Date) row[13]);
+            String placeName = (String) row[14];
+            String placeCategory = (String) row[15];
 
             Map<String, String> placeDetails = new LinkedHashMap<>();
             placeDetails.put("placeName", placeName);
@@ -115,19 +122,19 @@ public class BoardService {
         }
 
         BoardDetailDto.RouteDto routeDto = new BoardDetailDto.RouteDto(
-                (Integer) firstRow[7],
-                (java.sql.Date) firstRow[8],
+                (Integer) firstRow[8],
                 (java.sql.Date) firstRow[9],
+                (java.sql.Date) firstRow[10],
                 sortedRouteDetails
         );
 
         BoardDetailDto.TripDto tripDto = new BoardDetailDto.TripDto(
-                (Integer) firstRow[15],
                 (Integer) firstRow[16],
                 (Integer) firstRow[17],
                 (Integer) firstRow[18],
                 (Integer) firstRow[19],
-                (String) firstRow[20]
+                (Integer) firstRow[20],
+                (String) firstRow[21]
         );
 
         return new BoardDetailDto(boardDto, routeDto, tripDto);
@@ -183,13 +190,17 @@ public class BoardService {
             String representativeImage = (String) result[8];
             return new BoardAllDto(id, categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
         }).collect(Collectors.toList());
+
+
     }
 
     @Transactional
-    public void createBoard(BoardCreateDto createDto, CustomUserDetails userDetails) throws IOException {
+    public void createBoard(BoardCreateDto createDto, CustomUserDetails userDetails) throws IOException{
         Integer userId = userDetails.getUserId();
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저 찾을 수 없음"));
-        RouteEntity route = routeRepository.findById(createDto.getRouteId()).orElseThrow(() -> new IllegalArgumentException("경로 찾을 수 없음"));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저 찾을 수 없음"));
+        RouteEntity route = routeRepository.findById(createDto.getRouteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"경로 찾을 수 없음"));
 
         BoardEntity board = BoardEntity.builder()
                 .user(user)
@@ -236,11 +247,12 @@ public class BoardService {
     public void updateBoard(BoardCreateDto updateDto, CustomUserDetails userDetails, Integer postId) throws IOException{
         Integer userId = userDetails.getUserId();
         BoardEntity board = boardRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-        RouteEntity route = routeRepository.findById(updateDto.getRouteId()).orElseThrow(() -> new IllegalArgumentException("경로 찾을 수 없음"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"게시글을 찾을 수 없습니다."));
+        RouteEntity route = routeRepository.findById(updateDto.getRouteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"경로 찾을 수 없음"));
 
         if (!board.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"게시글을 수정할 권한이 없습니다.");
         }
 
         board.setRoute(route);
@@ -277,15 +289,27 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Integer postId, CustomUserDetails userDetails) {
         Integer userId = userDetails.getUserId();
-        BoardEntity board = boardRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        BoardEntity board = boardRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"게시글을 찾을 수 없습니다."));
+        TripEntity trip = tripRepository.findByBoard(board).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"여행 정보를 찾을 수 없습니다."));
 
         if (!board.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("게시글을 삭제할 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"게시글을 삭제할 권한이 없습니다.");
         }
 
+        // 게시글의 모든 이미지 삭제
         postImageRepository.deleteAllByBoard(board);
 
+        // 여행정보로 관련 모든 여행참여자 정보 삭제
+        usersInTravelRepository.deleteAllByTrip(trip);
+
+        // 게시글 정보로 여행정보 삭제
         tripRepository.deleteByBoard(board);
+
+        // 게시글 정보로 관련 모든 좋아요 삭제
+        likesRepository.deleteAllByBoard(board);
+
+        // 게시글 정보로 관련 모든 댓글 삭제
+        commentRepository.deleteAllByBoard(board);
 
         boardRepository.delete(board);
     }
@@ -293,11 +317,10 @@ public class BoardService {
     public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, String sortBy, String order) {
         Integer userId = userDetails.getUserId();
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저를 찾을 수 없습니다."));
 
         if (category.equals(BoardEntity.Category.REVIEW)){
-            String message = "리뷰 카테고리는 조회할 수 없습니다.";
-            return new BoardResponseDto<>(message , null);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "리뷰 카테고리는 조회할 수 없습니다");
         }
 
         List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, sortBy, order);
@@ -321,8 +344,12 @@ public class BoardService {
             );
         }).collect(Collectors.toList());
 
-        String message = participatedTrips.isEmpty() ? "조회할 수 있는 데이터가 없습니다." : "참여한 여행 게시물을 성공적으로 조회했습니다.";
-        return new BoardResponseDto<>(message, participatedTrips);
+        if(participatedTrips.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "조회할 수 있는 데이터가 없습니다.");
+        }else {
+            String message = "참여한 여행 게시물을 성공적으로 조회했습니다.";
+            return new BoardResponseDto<>(message, participatedTrips);
+        }
         }
 
         public BoardMainDto getTop6BoardsByCategories() {

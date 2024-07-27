@@ -36,4 +36,6 @@ public interface UsersInTravelRepository extends JpaRepository<UsersInTravelEnti
             @Param("order") String order);
 
     Optional<UsersInTravelEntity> findByUserAndTrip(UserEntity user, TripEntity trip);
+
+    void deleteAllByTrip(TripEntity trip);
 }
