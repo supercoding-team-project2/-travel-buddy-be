@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
-    List<CommentEntity> findAllByPostId(Integer post_id);
+    List<CommentEntity> findAllByBoard(BoardEntity boardEntity);
 
     void deleteAllByBoard(BoardEntity board);
 }

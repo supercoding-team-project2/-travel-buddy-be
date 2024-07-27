@@ -35,8 +35,10 @@ public class CommentService {
             log.info("isExistsBoard = " + isExistsBoard);
             if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
 
+            BoardEntity boardEntity = boardRepository.findById(postId).get();
+
             List<CommentResponse> allCommentResponseList = new ArrayList<>();
-            List<CommentEntity> comments = commentRepository.findAllByPostId(postId);
+            List<CommentEntity> comments = commentRepository.findAllByBoard(boardEntity);
 
             for (CommentEntity commentEntity : comments) {
                 CommentResponse commentResponse = CommentResponse.builder()
@@ -82,7 +84,7 @@ public class CommentService {
 
             CommentEntity commentEntity = CommentEntity.builder()
                     .user(userEntity)
-                    .post(boardEntity)
+                    .board(boardEntity)
                     .content(commentDTO.getContent())
                     .build();
 
