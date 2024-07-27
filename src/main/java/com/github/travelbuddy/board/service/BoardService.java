@@ -82,7 +82,7 @@ public class BoardService {
 
         if (results == null || results.isEmpty()) {
             log.error("No query result found for postId: " + postId);
-            throw new IllegalArgumentException("No query result found for postId: " + postId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물의 관련된 정보를 찾을 수 없습니다.");
         }
 
         Object[] firstRow = results.get(0);
@@ -190,13 +190,17 @@ public class BoardService {
             String representativeImage = (String) result[8];
             return new BoardAllDto(id, categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
         }).collect(Collectors.toList());
+
+
     }
 
     @Transactional
-    public void createBoard(BoardCreateDto createDto, CustomUserDetails userDetails) throws IOException {
+    public void createBoard(BoardCreateDto createDto, CustomUserDetails userDetails) throws IOException{
         Integer userId = userDetails.getUserId();
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저 찾을 수 없음"));
-        RouteEntity route = routeRepository.findById(createDto.getRouteId()).orElseThrow(() -> new IllegalArgumentException("경로 찾을 수 없음"));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저 찾을 수 없음"));
+        RouteEntity route = routeRepository.findById(createDto.getRouteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"경로 찾을 수 없음"));
 
         BoardEntity board = BoardEntity.builder()
                 .user(user)
@@ -243,11 +247,12 @@ public class BoardService {
     public void updateBoard(BoardCreateDto updateDto, CustomUserDetails userDetails, Integer postId) throws IOException{
         Integer userId = userDetails.getUserId();
         BoardEntity board = boardRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-        RouteEntity route = routeRepository.findById(updateDto.getRouteId()).orElseThrow(() -> new IllegalArgumentException("경로 찾을 수 없음"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"게시글을 찾을 수 없습니다."));
+        RouteEntity route = routeRepository.findById(updateDto.getRouteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"경로 찾을 수 없음"));
 
         if (!board.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"게시글을 수정할 권한이 없습니다.");
         }
 
         board.setRoute(route);
@@ -312,11 +317,10 @@ public class BoardService {
     public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, String sortBy, String order) {
         Integer userId = userDetails.getUserId();
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저를 찾을 수 없습니다."));
 
         if (category.equals(BoardEntity.Category.REVIEW)){
-            String message = "리뷰 카테고리는 조회할 수 없습니다.";
-            return new BoardResponseDto<>(message , null);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "리뷰 카테고리는 조회할 수 없습니다");
         }
 
         List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, sortBy, order);
@@ -340,8 +344,12 @@ public class BoardService {
             );
         }).collect(Collectors.toList());
 
-        String message = participatedTrips.isEmpty() ? "조회할 수 있는 데이터가 없습니다." : "참여한 여행 게시물을 성공적으로 조회했습니다.";
-        return new BoardResponseDto<>(message, participatedTrips);
+        if(participatedTrips.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "조회할 수 있는 데이터가 없습니다.");
+        }else {
+            String message = "참여한 여행 게시물을 성공적으로 조회했습니다.";
+            return new BoardResponseDto<>(message, participatedTrips);
+        }
         }
 
         public BoardMainDto getTop6BoardsByCategories() {
