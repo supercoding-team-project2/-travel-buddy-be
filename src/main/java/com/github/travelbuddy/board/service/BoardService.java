@@ -3,8 +3,10 @@ package com.github.travelbuddy.board.service;
 import com.github.travelbuddy.board.dto.*;
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
+import com.github.travelbuddy.comment.repository.CommentRepository;
 import com.github.travelbuddy.common.service.S3Service;
 import com.github.travelbuddy.common.util.UUIDUtil;
+import com.github.travelbuddy.likes.repository.LikesRepository;
 import com.github.travelbuddy.postImage.entity.PostImageEntity;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
@@ -19,9 +21,11 @@ import com.github.travelbuddy.users.repository.UserRepository;
 import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -47,6 +51,8 @@ public class BoardService {
     private final S3Service s3Service;
     private final TripService tripService;
     private final UsersInTravelRepository usersInTravelRepository;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
         log.info("Category: " + category);
@@ -278,15 +284,27 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Integer postId, CustomUserDetails userDetails) {
         Integer userId = userDetails.getUserId();
-        BoardEntity board = boardRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        BoardEntity board = boardRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"게시글을 찾을 수 없습니다."));
+        TripEntity trip = tripRepository.findByBoard(board).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"여행 정보를 찾을 수 없습니다."));
 
         if (!board.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("게시글을 삭제할 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"게시글을 삭제할 권한이 없습니다.");
         }
 
+        // 게시글의 모든 이미지 삭제
         postImageRepository.deleteAllByBoard(board);
 
+        // 여행정보로 관련 모든 여행참여자 정보 삭제
+        usersInTravelRepository.deleteAllByTrip(trip);
+
+        // 게시글 정보로 여행정보 삭제
         tripRepository.deleteByBoard(board);
+
+        // 게시글 정보로 관련 모든 좋아요 삭제
+        likesRepository.deleteAllByBoard(board);
+
+        // 게시글 정보로 관련 모든 댓글 삭제
+        commentRepository.deleteAllByBoard(board);
 
         boardRepository.delete(board);
     }
