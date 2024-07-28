@@ -1,9 +1,11 @@
 package com.github.travelbuddy.common.config;
 
 import com.github.travelbuddy.chat.service.ChatUserService;
+import com.github.travelbuddy.users.handler.CustomSuccessHandler;
 import com.github.travelbuddy.users.jwt.JWTFilter;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.jwt.LoginFilter;
+import com.github.travelbuddy.users.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +17,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -30,6 +34,8 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtill jwtUtill;
     private final ChatUserService chatUserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)throws Exception {
@@ -62,6 +68,7 @@ public class SecurityConfig {
 
                                 //Authorization에 jwt를 넣어서 보내주기 때문에 허용
                                 configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                                configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
 
                                 return configuration;
                             }
@@ -69,7 +76,15 @@ public class SecurityConfig {
                 .csrf((auth) -> auth.disable())
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable())
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler))
+//                .oauth2Login(oauth2 -> oauth2
+//                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/*"))
+//                        .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService)))
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/login/oauth2/**").permitAll()
                         .requestMatchers("/api/user/signup/sms/send").permitAll()
                         .requestMatchers("/api/user/signup/sms/check").permitAll()
                         .requestMatchers("/api/user/sms-code/check").permitAll()
@@ -84,7 +99,8 @@ public class SecurityConfig {
                         .requestMatchers("/ws").permitAll()
                         .requestMatchers("/api/attend/*").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(new JWTFilter(jwtUtill), LoginFilter.class) //loginFilter전에 등록
+                .addFilterAfter(new JWTFilter(jwtUtill), OAuth2LoginAuthenticationFilter.class)
+//                .addFilterBefore(new JWTFilter(jwtUtill), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill, chatUserService);

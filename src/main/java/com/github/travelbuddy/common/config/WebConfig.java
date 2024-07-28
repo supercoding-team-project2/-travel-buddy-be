@@ -17,6 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://127.0.0.1:3000/"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .exposedHeaders("Set-Cookie");
     }
 }
