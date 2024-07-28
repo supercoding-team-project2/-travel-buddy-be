@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,11 +73,13 @@ public class RouteDeleteService {
         List<BoardEntity> boards = route.getBoards();
 
         for (BoardEntity board : boards) {
-            TripEntity trip = tripRepository.findByBoard(board)
-                    .orElseThrow(() -> new RuntimeException("여행 정보를 찾을 수 없습니다"));
+            Optional<TripEntity> optionalTrip = tripRepository.findByBoard(board);
+            if (optionalTrip.isPresent()) {
+                TripEntity trip = optionalTrip.get();
 
-            usersInTravelRepository.deleteAllByTrip(trip);
-            tripRepository.delete(trip);
+                usersInTravelRepository.deleteAllByTrip(trip);
+                tripRepository.delete(trip);
+            }
             postImageRepository.deleteAllByBoard(board);
             commentRepository.deleteAllByBoard(board);
             likesRepository.deleteAllByBoard(board);
@@ -85,4 +88,3 @@ public class RouteDeleteService {
         routeRepository.delete(route);
     }
 }
-
