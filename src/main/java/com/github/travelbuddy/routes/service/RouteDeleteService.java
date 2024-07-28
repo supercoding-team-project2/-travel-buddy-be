@@ -2,7 +2,8 @@ package com.github.travelbuddy.routes.service;
 
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
-import com.github.travelbuddy.postImage.entity.PostImageEntity;
+import com.github.travelbuddy.comment.repository.CommentRepository;
+import com.github.travelbuddy.likes.repository.LikesRepository;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
 import com.github.travelbuddy.routes.repository.RouteRepository;
@@ -19,11 +20,19 @@ public class RouteDeleteService {
     private final RouteRepository routeRepository;
     private final BoardRepository boardRepository;
     private final PostImageRepository postImageRepository;
+    private final CommentRepository commentRepository;
+    private final LikesRepository likesRepository;
 
-    public RouteDeleteService(RouteRepository routeRepository, BoardRepository boardRepository, PostImageRepository postImageRepository) {
+    public RouteDeleteService(RouteRepository routeRepository,
+                              BoardRepository boardRepository,
+                              PostImageRepository postImageRepository,
+                              CommentRepository commentRepository,
+                              LikesRepository likesRepository) {
         this.routeRepository = routeRepository;
         this.boardRepository = boardRepository;
         this.postImageRepository = postImageRepository;
+        this.commentRepository = commentRepository;
+        this.likesRepository = likesRepository;
     }
 
     public String deleteRoute(Integer routeId, Integer userId) {
@@ -54,14 +63,12 @@ public class RouteDeleteService {
         List<BoardEntity> boards = route.getBoards();
 
         for (BoardEntity board : boards) {
-            List<PostImageEntity> postImages = board.getPostImages();
-            for (PostImageEntity postImage : postImages) {
-                postImageRepository.delete(postImage);
-            }
-
+            postImageRepository.deleteAllByBoard(board);
+            commentRepository.deleteAllByBoard(board);
+            likesRepository.deleteAllByBoard(board);
             boardRepository.delete(board);
         }
-
         routeRepository.delete(route);
     }
 }
+
