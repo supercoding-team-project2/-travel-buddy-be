@@ -23,6 +23,10 @@ public class LikesService {
     private final BoardRepository boardRepository;
 
     public ResponseEntity<?> processLike(Integer postId, Integer userId, String method) {
+        log.info("==================== processLike ====================");
+        log.info("postId = " + postId);
+        log.info("userId = " + userId);
+
         if (method.equals("POST")) {
             UserEntity userEntity = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
@@ -31,6 +35,7 @@ public class LikesService {
                     .orElseThrow(() -> new RuntimeException("게시물 " + postId + " 를 찾을 수 없습니다."));
 
             boolean isAlreadyLikedUser = likesRepository.existsByUserId(userId);
+            log.info("isAlreadyLikedUser = " + isAlreadyLikedUser);
             if(isAlreadyLikedUser) return ResponseEntity.status(HttpStatus.CONFLICT).body("ALREADY LIKE");
 
             LikesEntity likesEntity = LikesEntity.builder()
@@ -56,6 +61,7 @@ public class LikesService {
             likeResponse.setUserId(userId);
             likeResponse.setBoardId(postId);
             likeResponse.setMessage("LIKES DELETED");
+            log.info("likeResponse = " + likeResponse);
 
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(likeResponse);
         }
