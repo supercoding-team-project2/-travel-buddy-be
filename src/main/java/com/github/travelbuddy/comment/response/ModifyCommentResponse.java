@@ -11,5 +11,4 @@ import lombok.*;
 public class ModifyCommentResponse {
     private Integer postId;
     private String message;
-    private CommentResponse commentResponse;
 }

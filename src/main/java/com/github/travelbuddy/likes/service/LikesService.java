@@ -34,9 +34,9 @@ public class LikesService {
             BoardEntity boardEntity = boardRepository.findById(postId)
                     .orElseThrow(() -> new RuntimeException("게시물 " + postId + " 를 찾을 수 없습니다."));
 
-            boolean isAlreadyLikedUser = likesRepository.existsByUserId(userId);
-            log.info("isAlreadyLikedUser = " + isAlreadyLikedUser);
-            if(isAlreadyLikedUser) return ResponseEntity.status(HttpStatus.CONFLICT).body("ALREADY LIKE");
+            boolean isExistsLikeEntity = likesRepository.existsByUserIdAndBoardId(userId, postId);
+
+            if(isExistsLikeEntity) return ResponseEntity.status(HttpStatus.CONFLICT).body("ALREADY LIKE");
 
             LikesEntity likesEntity = LikesEntity.builder()
                     .user(userEntity)

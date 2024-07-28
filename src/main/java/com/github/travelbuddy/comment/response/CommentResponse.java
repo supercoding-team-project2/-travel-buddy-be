@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentResponse {
+    private Integer id;
     private String comment;
     private String userName;
     private String profileImgUrl;

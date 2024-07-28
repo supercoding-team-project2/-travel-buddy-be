@@ -40,6 +40,7 @@ public class CommentService {
 
             for (CommentEntity commentEntity : comments) {
                 CommentResponse commentResponse = CommentResponse.builder()
+                        .id(commentEntity.getId())
                         .userName(commentEntity.getUser().getName())
                         .comment(commentEntity.getContent())
                         .profileImgUrl(commentEntity.getUser().getProfilePictureUrl())
@@ -87,7 +88,6 @@ public class CommentService {
             AddCommentResponse addCommentResponse = AddCommentResponse.builder()
                     .postId(postId)
                     .message("ADD COMMENT COMPLETE")
-                    .commentResponse(new CommentResponse(commentDTO.getContent(), userEntity.getName(), userEntity.getProfilePictureUrl()))
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK).body(addCommentResponse);
@@ -110,13 +110,9 @@ public class CommentService {
             commentEntity.setContent(commentDTO.getContent());
             commentRepository.save(commentEntity);
 
-            CommentResponse commentResponse =
-                    new CommentResponse(commentDTO.getContent(), commentEntity.getUser().getName(), commentEntity.getUser().getProfilePictureUrl());
-
             ModifyCommentResponse modifyCommentResponse = ModifyCommentResponse.builder()
                     .postId(postId)
                     .message("MODIFY COMMENT COMPLETED")
-                    .commentResponse(commentResponse)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK).body(modifyCommentResponse);
