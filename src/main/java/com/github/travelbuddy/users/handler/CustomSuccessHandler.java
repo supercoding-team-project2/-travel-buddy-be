@@ -29,7 +29,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtUtill.createJwt(userId,5*60*60*1000L);
 
         response.addCookie(createCookies("Authorization",token,5*60*60*1000));
-        response.sendRedirect("http://localhost:3000/oauth2-jwt"); //TODO: 헤더로 토큰 보내기 위한 redirect
+        response.sendRedirect("http://localhost:3000/oauth2-jwt");
     }
     public Cookie createCookies(String key, String value, Integer expiration) {
         Cookie cookie = new Cookie(key, value);

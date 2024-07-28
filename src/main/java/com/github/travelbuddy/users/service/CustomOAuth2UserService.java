@@ -35,28 +35,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException{
 
 
-
+        log.info("Oauth2UserService loadUser");
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        log.info("loadUser: {}", oAuth2User);
         String oauthClientName = userRequest.getClientRegistration().getClientName();
 
-        try{
-            System.out.println(new ObjectMapper().writeValueAsString(oAuth2User.getAttributes()));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        log.info("oauthClientName: {}", oauthClientName);
         OAuth2Response oauth2Response = null;
         if(oauthClientName.equals("kakao")){
             oauth2Response = new KakaoResponse(oAuth2User.getAttributes());
-            log.info("oauth2Response: {}", oauth2Response.toString());
-            log.info("name: {}", oauth2Response.getName());
-            log.info("email: {}", oauth2Response.getEmail());
-            log.info("getBirthday: {}", oauth2Response.getBirthday());
-            log.info("getBirthYear: {}", oauth2Response.getBirthYear());
-            log.info("getGender: {}", oauth2Response.getGender());
-            log.info("getPhoneNumber: {}", oauth2Response.getPhoneNumber());
         }
 
         if (oauth2Response == null) {
@@ -87,6 +72,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         UserEntity existData = userRepository.findByEmail(oauth2Response.getEmail());
 
         if(existData == null){
+            log.info("소셜로그인 처음");
             UserEntity userEntity = UserEntity.builder()
                     .name(oauth2Response.getName())
                     .email(oauth2Response.getEmail())
@@ -106,6 +92,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             return new CustomOAuth2User(userDto);
         }else{
+            log.info("소셜로그인 처음아님");
             UserEntity userEntity = existData.toBuilder()
                     .name(oauth2Response.getName())
                     .phoneNum(withoutCountryCode)
