@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LikesRepository extends JpaRepository<LikesEntity, Integer> {
     LikesEntity findByUserIdAndBoardId(Integer userId, Integer boardId);
-    boolean existsByUserId(Integer userId);
+    boolean existsByUserIdAndBoardId(Integer userId, Integer boardId);
 
     void deleteAllByBoard(BoardEntity board);
 }
