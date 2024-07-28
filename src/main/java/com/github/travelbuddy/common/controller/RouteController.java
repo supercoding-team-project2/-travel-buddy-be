@@ -1,9 +1,9 @@
 package com.github.travelbuddy.common.controller;
 
+import com.github.travelbuddy.routes.service.RouteDeleteService;
 import com.github.travelbuddy.routes.dto.RouteDto;
 import com.github.travelbuddy.routes.dto.RoutePutDto;
 import com.github.travelbuddy.routes.service.RoutePostService;
-import com.github.travelbuddy.routes.service.RouteDeleteService;
 import com.github.travelbuddy.routes.service.RouteGetService;
 import com.github.travelbuddy.routes.service.RoutePutService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/routes")
@@ -66,13 +68,39 @@ public class RouteController {
     }
 
     @DeleteMapping("/delete/{routeId}")
-    public ResponseEntity<String> deleteRoute(@PathVariable Integer routeId) {
+    public ResponseEntity<Map<String, String>> deleteRoute(@PathVariable Integer routeId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Integer userId = userDetails.getUserId();
 
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Integer userId = userDetails.getUserId();
+            String boardTitles = routeDeleteService.deleteRoute(routeId, userId);
 
-        routeDeleteService.deleteRoute(routeId, userId);
-        return ResponseEntity.ok("성공적으로 삭제되었습니다.");
+            if (boardTitles == null) {
+                response.put("message", "성공적으로 삭제되었습니다.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "게시물이 있는 여행 경로입니다.");
+                response.put("boardTitles", boardTitles);
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+            }
+        } catch (SecurityException se) {
+            response.put("error", "삭제 권한이 없습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        } catch (Exception e) {
+            response.put("error", "요청 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @DeleteMapping("/delete-boards/{routeId}")
+    public ResponseEntity<String> deleteRouteWithBoards(@PathVariable Integer routeId) {
+        try {
+            routeDeleteService.deleteRouteWithBoards(routeId);
+            return ResponseEntity.ok("성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping("/list")

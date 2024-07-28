@@ -1,5 +1,6 @@
 package com.github.travelbuddy.routes.entity;
 
+import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.users.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -41,4 +43,8 @@ public class RouteEntity {
 
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RouteDayEntity> routeDays;
+
+    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardEntity> boards;
+
 }

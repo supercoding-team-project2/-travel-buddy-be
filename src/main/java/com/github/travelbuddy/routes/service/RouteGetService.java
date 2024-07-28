@@ -21,7 +21,7 @@ public class RouteGetService {
     }
 
     public List<RouteDto> getRoutesByUserId(Integer userId) {
-        List<RouteEntity> routeEntities = routeRepository.findByUserId(userId);
+        List<RouteEntity> routeEntities = routeRepository.findByUserIdOrderByCreatedAtDesc(userId);
         return routeEntities.stream()
                 .map(routeMapper::toRouteDto)
                 .collect(Collectors.toList());

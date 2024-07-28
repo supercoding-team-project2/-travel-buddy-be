@@ -26,6 +26,7 @@ public class BoardDetailDto {
         private String summary;
         private String content;
         private BoardEntity.Category category;
+        private String authorUUID;
         private String author;
         private String userProfile;
         private Long likeCount;
