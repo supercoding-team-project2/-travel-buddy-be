@@ -7,6 +7,7 @@ import com.github.travelbuddy.comment.repository.CommentRepository;
 import com.github.travelbuddy.common.service.S3Service;
 import com.github.travelbuddy.common.util.UUIDUtil;
 import com.github.travelbuddy.likes.repository.LikesRepository;
+import com.github.travelbuddy.likes.service.LikesService;
 import com.github.travelbuddy.postImage.entity.PostImageEntity;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
@@ -52,6 +53,7 @@ public class BoardService {
     private final TripService tripService;
     private final UsersInTravelRepository usersInTravelRepository;
     private final LikesRepository likesRepository;
+    private final LikesService likesService;
     private final CommentRepository commentRepository;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
@@ -77,8 +79,13 @@ public class BoardService {
         }).collect(Collectors.toList());
     }
 
-    public BoardDetailDto getPostDetails(Integer postId) {
+    public BoardDetailDto getPostDetails(CustomUserDetails userDetails, Integer postId) {
         List<Object[]> results = boardRepository.findPostDetailsById(postId);
+        Integer userId = userDetails.getUserId();
+
+        if (userId == null || userId == 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다. 로그인 정보를 확인해주세요");
+        }
 
         if (results == null || results.isEmpty()) {
             log.error("No query result found for postId: " + postId);
@@ -86,7 +93,6 @@ public class BoardService {
         }
 
         Object[] firstRow = results.get(0);
-        String authorUUID = UUIDUtil.generateUUIDFromUserId((Integer) firstRow[5]);
 
         BoardDetailDto.BoardDto boardDto = new BoardDetailDto.BoardDto(
                 (Integer) firstRow[0],
@@ -94,7 +100,7 @@ public class BoardService {
                 (String) firstRow[2],
                 (String) firstRow[3],
                 BoardEntity.Category.valueOf((String) firstRow[4]),
-                authorUUID,
+                (Integer) firstRow[5],
                 (String) firstRow[6],
                 (String) firstRow[7],
                 ((Number) firstRow[11]).longValue(),
@@ -137,7 +143,10 @@ public class BoardService {
                 (String) firstRow[21]
         );
 
-        return new BoardDetailDto(boardDto, routeDto, tripDto);
+        Boolean result = likesService.likeStatus(userId , postId);
+        BoardDetailDto.LikeStatus likeStatus = new BoardDetailDto.LikeStatus(result);
+
+        return new BoardDetailDto(boardDto, routeDto, tripDto, likeStatus);
     }
     public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(CustomUserDetails userDetails, BoardEntity.Category category) {
         Integer userId = userDetails.getUserId();
@@ -352,16 +361,16 @@ public class BoardService {
         }
         }
 
-        public BoardMainDto getTop6BoardsByCategories() {
-            List<BoardMainSimpleDto> top6ReviewBoards = getTop6BoardsByCategory(BoardEntity.Category.REVIEW, "likeCount");
-            List<BoardMainSimpleDto> top6GuideBoards = getTop6BoardsByCategory(BoardEntity.Category.GUIDE, "createdAt");
-            List<BoardMainSimpleDto> top6CompanionBoards = getTop6BoardsByCategory(BoardEntity.Category.COMPANION, "createdAt");
+        public BoardMainDto getTop4BoardsByCategories() {
+            List<BoardMainSimpleDto> top4ReviewBoards = getTop4BoardsByCategory(BoardEntity.Category.REVIEW, "likeCount");
+            List<BoardMainSimpleDto> top4GuideBoards = getTop4BoardsByCategory(BoardEntity.Category.GUIDE, "createdAt");
+            List<BoardMainSimpleDto> top4CompanionBoards = getTop4BoardsByCategory(BoardEntity.Category.COMPANION, "createdAt");
 
-            return new BoardMainDto(top6ReviewBoards, top6GuideBoards, top6CompanionBoards);
+            return new BoardMainDto(top4ReviewBoards, top4GuideBoards, top4CompanionBoards);
         }
 
-        private List<BoardMainSimpleDto> getTop6BoardsByCategory(BoardEntity.Category category, String sortBy) {
-            List<Object[]> results = boardRepository.findTop6BoardsByCategoryWithRepresentativeImage(category, sortBy);
+        private List<BoardMainSimpleDto> getTop4BoardsByCategory(BoardEntity.Category category, String sortBy) {
+            List<Object[]> results = boardRepository.findTop4BoardsByCategoryWithRepresentativeImage(category, sortBy);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             return results.stream().map(result -> {

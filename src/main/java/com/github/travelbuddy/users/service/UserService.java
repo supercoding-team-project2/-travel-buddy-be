@@ -151,6 +151,9 @@ public class UserService {
     }
 
     public ResponseEntity<?> oauth2JwtHeader(HttpServletRequest request, HttpServletResponse response) {
+        log.info("oauth2JwtHeader requestURI: {}",request.getRequestURI());
+        log.info("oauth2JwtHeader requestMethod: {}",request.getMethod());
+        log.info("oauth2JwtHeader headerName: {}",request.getHeader("Authorization"));
         Cookie[] cookies = request.getCookies();
         String token = null;
 

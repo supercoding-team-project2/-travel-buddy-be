@@ -16,6 +16,7 @@ public class BoardDetailDto {
     private BoardDto board;
     private RouteDto route;
     private TripDto trip;
+    private LikeStatus likeStatus;
 
     @Data
     @AllArgsConstructor
@@ -26,7 +27,7 @@ public class BoardDetailDto {
         private String summary;
         private String content;
         private BoardEntity.Category category;
-        private String authorUUID;
+        private Integer authorID;
         private String author;
         private String userProfile;
         private Long likeCount;
@@ -53,5 +54,12 @@ public class BoardDetailDto {
         private Integer targetNumber;
         private Integer participantCount;
         private String gender;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LikeStatus {
+        private boolean status;
     }
 }

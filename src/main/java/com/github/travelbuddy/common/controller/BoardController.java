@@ -36,9 +36,10 @@ public class BoardController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostDetails(@PathVariable Integer postId) {
+    public ResponseEntity<?> getPostDetails(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                            @PathVariable Integer postId) {
         try{
-            BoardDetailDto boardDetailDto =  boardService.getPostDetails(postId);
+            BoardDetailDto boardDetailDto =  boardService.getPostDetails(userDetails, postId);
             return ResponseEntity.status(HttpStatus.OK).body(boardDetailDto);
         }catch (ResponseStatusException e){
             log.error("게시물 상세정보 조회 중 에러 발생" , e);
@@ -109,8 +110,8 @@ public class BoardController {
     }
 
     @GetMapping("/top6-categories")
-    public ResponseEntity<BoardMainDto> getTop6BoardsByCategories() {
-        BoardMainDto response = boardService.getTop6BoardsByCategories();
+    public ResponseEntity<BoardMainDto> getTop4BoardsByCategories() {
+        BoardMainDto response = boardService.getTop4BoardsByCategories();
         return ResponseEntity.ok(response);
     }
 }
