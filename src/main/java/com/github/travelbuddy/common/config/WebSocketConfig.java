@@ -37,11 +37,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(chatPreHandler);
+        registration.taskExecutor().corePoolSize(10).maxPoolSize(100);
+    }
+
+    @Override
+    public void configureClientOutboundChannel(ChannelRegistration registration) {
+        registration.taskExecutor().corePoolSize(10).maxPoolSize(100);
     }
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         log.info("============ Received a new web socket connection ============");
     }
+
 }
 

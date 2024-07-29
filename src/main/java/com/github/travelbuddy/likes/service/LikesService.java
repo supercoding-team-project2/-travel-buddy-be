@@ -4,6 +4,7 @@ import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
 import com.github.travelbuddy.likes.entity.LikesEntity;
 import com.github.travelbuddy.likes.repository.LikesRepository;
+import com.github.travelbuddy.likes.response.LikeInfoResponse;
 import com.github.travelbuddy.likes.response.LikeResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.repository.UserRepository;
@@ -76,5 +77,24 @@ public class LikesService {
         }else {
             return true;
         }
+    }
+
+    public ResponseEntity<?> getLikeInfo(Integer postId, Integer userId) {
+        boolean isLike = likeStatus(userId, postId);
+
+        BoardEntity boardEntity = boardRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시물 " + postId + " 를 찾을 수 없습니다."));
+
+        log.info("게시물 ID: " + boardEntity.getId());
+
+        Integer likeCount = likesRepository.countAllByBoard(boardEntity);
+        log.info("likeCount = " + likeCount);
+
+        LikeInfoResponse likeInfoResponse = LikeInfoResponse.builder()
+                .count(likeCount)
+                .isLike(isLike)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(likeInfoResponse);
     }
 }

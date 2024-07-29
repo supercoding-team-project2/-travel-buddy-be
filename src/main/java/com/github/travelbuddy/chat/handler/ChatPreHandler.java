@@ -16,10 +16,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ChatPreHandler implements ChannelInterceptor {
 
-    private final JWTUtill jwtUtill;
-    private final UserService userService;
-    Long memberId = 0L;
-
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
@@ -30,10 +26,7 @@ public class ChatPreHandler implements ChannelInterceptor {
                                             .replace("[","")
                                             .replace("]","");
 
-            log.info("authorization = " + authorization);
-
-            boolean isExpiredToken = jwtUtill.isExpired(authorization);
-            log.info("isExpiredToken = " + isExpiredToken);
+            log.info("authorization in chatPreHandler = " + authorization);
         }
 
         return message;
