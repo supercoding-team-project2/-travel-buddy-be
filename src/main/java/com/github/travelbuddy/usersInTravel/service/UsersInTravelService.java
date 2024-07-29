@@ -37,6 +37,10 @@ public class UsersInTravelService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "참여 가능한 나이가 아닙니다.");
         }
 
+        if (!trip.getGender().equals("ALL") && !trip.getGender().equals(user.getGender().toString())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "참여 가능한 성별이 아닙니다.");
+        }
+
         if(userId.equals(trip.getUser().getId())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "작성자는 참여신청을 할 수 없습니다.");
         }
