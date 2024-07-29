@@ -61,16 +61,26 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
 
     @Query("SELECT b.id, b.category, b.title, b.summary, b.user.name, r.startAt, r.endAt, COUNT(l.id) as likeCount, " +
            "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +
-           "FROM BoardEntity b JOIN LikesEntity l ON b.id = l.board.id " +
+           "FROM BoardEntity b LEFT JOIN LikesEntity l ON b.id = l.board.id " +
            "JOIN RouteEntity r ON b.route.id = r.id " +
            "WHERE l.user.id = :userId " +
            "AND (:category IS NULL OR b.category = :category) " +
+           "AND (:startDate IS NULL OR :endDate IS NULL OR (DATE(r.startAt) <= DATE(:endDate) AND DATE(r.endAt) >= DATE(:startDate))) " +
            "GROUP BY b.id, b.category, b.title, b.summary, b.user.name, r.startAt, r.endAt, b.createdAt " +
            "ORDER BY " +
-           "CASE WHEN :sortBy = 'createdAt' THEN b.createdAt END DESC, " +
-           "CASE WHEN :sortBy = 'likeCount' THEN COUNT(l.id) END DESC, " +
-           "CASE WHEN :sortBy = 'title' THEN b.title END ASC")
-    List<Object[]> findLikedPostsByUserIdAndCategory(@Param("userId") Integer userId, @Param("category") BoardEntity.Category category, @Param("sortBy") String sortBy);
+           "CASE WHEN :sortBy = 'createdAt' AND :order = 'desc' THEN b.createdAt END DESC, " +
+           "CASE WHEN :sortBy = 'createdAt' AND :order = 'asc' THEN b.createdAt END ASC, " +
+           "CASE WHEN :sortBy = 'likes' AND :order = 'desc' THEN COUNT(l.id) END DESC, " +
+           "CASE WHEN :sortBy = 'likes' AND :order = 'asc' THEN COUNT(l.id) END ASC, " +
+           "CASE WHEN :sortBy = 'title' AND :order = 'desc' THEN b.title END DESC, " +
+           "CASE WHEN :sortBy = 'title' AND :order=  'asc' THEN b.title END ASC ")
+    List<Object[]> findLikedPostsByUserIdAndCategory(
+            @Param("userId") Integer userId,
+            @Param("category") BoardEntity.Category category,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate,
+            @Param("sortBy") String sortBy,
+            @Param("order") String order);
 
     @Query("SELECT b.id, b.title, b.createdAt, COUNT(l.id) as likeCount," +
             "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +

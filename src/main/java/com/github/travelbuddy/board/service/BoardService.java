@@ -64,6 +64,7 @@ public class BoardService {
         log.info("Order: " + order);
 
         List<Object[]> results = boardRepository.findAllWithRepresentativeImageAndDateRange(category, startDate, endDate, sortBy, order);
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
             Integer id = (Integer) result[0];
@@ -182,10 +183,10 @@ public class BoardService {
         return new BoardResponseDto<>(message , boardSimpleDtos);
     }
 
-    public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, String sortBy) {
+    public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, Date startDate, Date endDate, String sortBy, String order) {
         Integer userId = userDetails.getUserId();
 
-        List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, sortBy);
+        List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, startDate, endDate, sortBy, order);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
             Integer id = (Integer) result[0];
@@ -323,7 +324,7 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
-    public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, String sortBy, String order) {
+    public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, Date startDate, Date endDate, String sortBy, String order) {
         Integer userId = userDetails.getUserId();
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저를 찾을 수 없습니다."));
@@ -332,7 +333,7 @@ public class BoardService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "리뷰 카테고리는 조회할 수 없습니다");
         }
 
-        List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, sortBy, order);
+        List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, startDate, endDate, sortBy, order);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         List<BoardAllDto> participatedTrips = results.stream().map(result -> {

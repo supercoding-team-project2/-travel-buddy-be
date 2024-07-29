@@ -60,8 +60,11 @@ public class BoardController {
     public ResponseEntity<BoardResponseDto<BoardAllDto>> getLikedPostsByUser(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) BoardEntity.Category category,
-            @RequestParam(required = false) String sortBy) {
-        List<BoardAllDto> likedPosts = boardService.getLikedPostsByUser(userDetails, category, sortBy);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String order) {
+        List<BoardAllDto> likedPosts = boardService.getLikedPostsByUser(userDetails, category, startDate, endDate, sortBy, order);
         String message = likedPosts.isEmpty() ? "추천한 게시물이 없습니다." : "추천한 게시물을 성공적으로 조회했습니다.";
         return ResponseEntity.ok(new BoardResponseDto<>(message, likedPosts));
     }
@@ -101,11 +104,14 @@ public class BoardController {
     }
 
     @GetMapping("/participated")
-    public ResponseEntity<BoardResponseDto<BoardAllDto>> getParticipatedTripsByUser(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                        @RequestParam(required = false) BoardEntity.Category category,
-                                                                        @RequestParam(required = false) String sortBy,
-                                                                        @RequestParam(required = false) String order) {
-        BoardResponseDto<BoardAllDto> participatedTrips = boardService.getParticipatedTripsByUser(userDetails, category, sortBy, order);
+    public ResponseEntity<BoardResponseDto<BoardAllDto>> getParticipatedTripsByUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(required = false) BoardEntity.Category category,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String order) {
+        BoardResponseDto<BoardAllDto> participatedTrips = boardService.getParticipatedTripsByUser(userDetails, category, startDate, endDate, sortBy, order);
         return ResponseEntity.ok(participatedTrips);
     }
 
