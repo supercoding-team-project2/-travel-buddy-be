@@ -7,7 +7,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRoomDto {
+public class ChatRoomEnterDto {
     private Integer myId;
     private Integer opponentId;
 }
