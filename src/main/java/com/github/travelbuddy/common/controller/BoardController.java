@@ -36,10 +36,9 @@ public class BoardController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostDetails(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                            @PathVariable Integer postId) {
+    public ResponseEntity<?> getPostDetails(@PathVariable Integer postId) {
         try{
-            BoardDetailDto boardDetailDto =  boardService.getPostDetails(userDetails, postId);
+            BoardDetailDto boardDetailDto =  boardService.getPostDetails(postId);
             return ResponseEntity.status(HttpStatus.OK).body(boardDetailDto);
         }catch (ResponseStatusException e){
             log.error("게시물 상세정보 조회 중 에러 발생" , e);

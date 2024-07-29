@@ -80,13 +80,8 @@ public class BoardService {
         }).collect(Collectors.toList());
     }
 
-    public BoardDetailDto getPostDetails(CustomUserDetails userDetails, Integer postId) {
+    public BoardDetailDto getPostDetails(Integer postId) {
         List<Object[]> results = boardRepository.findPostDetailsById(postId);
-        Integer userId = userDetails.getUserId();
-
-        if (userId == null || userId == 0){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다. 로그인 정보를 확인해주세요");
-        }
 
         if (results == null || results.isEmpty()) {
             log.error("No query result found for postId: " + postId);
@@ -144,10 +139,7 @@ public class BoardService {
                 (String) firstRow[21]
         );
 
-        Boolean result = likesService.likeStatus(userId , postId);
-        BoardDetailDto.LikeStatus likeStatus = new BoardDetailDto.LikeStatus(result);
-
-        return new BoardDetailDto(boardDto, routeDto, tripDto, likeStatus);
+        return new BoardDetailDto(boardDto, routeDto, tripDto);
     }
     public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(CustomUserDetails userDetails, BoardEntity.Category category) {
         Integer userId = userDetails.getUserId();
