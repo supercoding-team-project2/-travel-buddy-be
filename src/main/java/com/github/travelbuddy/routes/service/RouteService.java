@@ -161,7 +161,7 @@ public class RouteService {
     }
 
     public List<RouteDto> getRoutesByUserId(Integer userId) {
-        List<RouteEntity> routeEntities = routeRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<RouteEntity> routeEntities = routeRepository.findByUserIdOrderByCreatedAtDescIdDesc(userId);
         return routeEntities.stream()
                 .map(routeMapper::toRouteDto)
                 .collect(Collectors.toList());
