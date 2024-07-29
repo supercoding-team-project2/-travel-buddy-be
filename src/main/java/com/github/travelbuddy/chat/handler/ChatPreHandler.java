@@ -30,7 +30,7 @@ public class ChatPreHandler implements ChannelInterceptor {
                                             .replace("[","")
                                             .replace("]","");
 
-            log.info("authorization = " + authorization);
+            log.info("authorization in chatPreHandler = " + authorization);
 
             boolean isExpiredToken = jwtUtill.isExpired(authorization);
             log.info("isExpiredToken = " + isExpiredToken);
