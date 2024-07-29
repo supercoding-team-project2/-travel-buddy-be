@@ -6,6 +6,7 @@ import com.github.travelbuddy.users.jwt.JWTFilter;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.jwt.LoginFilter;
 import com.github.travelbuddy.users.service.CustomOAuth2UserService;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -86,6 +87,7 @@ public class SecurityConfig {
 //                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/*"))
 //                        .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService)))
                 .authorizeHttpRequests((auth) -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()
                         .requestMatchers("/api/user/signup/sms/send").permitAll()
                         .requestMatchers("/api/user/signup/sms/check").permitAll()
