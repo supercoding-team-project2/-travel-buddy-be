@@ -11,6 +11,7 @@ public class BoardMainSimpleDto {
     private Integer id;
     private String title;
     private String representativeImage;
+    private String author;
     private String createdAt;
     private Long likeCount;
 }

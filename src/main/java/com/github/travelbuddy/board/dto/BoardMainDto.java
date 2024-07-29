@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardMainDto {
-    private List<BoardMainSimpleDto> top6ReviewBoards;
-    private List<BoardMainSimpleDto> top6GuideBoards;
-    private List<BoardMainSimpleDto> top6CompanionBoards;
+    private List<BoardMainSimpleDto> top4ReviewBoards;
+    private List<BoardMainSimpleDto> top4GuideBoards;
+    private List<BoardMainSimpleDto> top4CompanionBoards;
 }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,20 +19,24 @@ public interface UsersInTravelRepository extends JpaRepository<UsersInTravelEnti
             "FROM UsersInTravelEntity u " +
             "JOIN u.trip t " +
             "JOIN t.board b " +
+            "JOIN b.route r " +
             "LEFT JOIN LikesEntity l ON b.id = l.board.id " +
             "WHERE u.user = :user " +
             "AND (:category IS NULL OR b.category = :category) " +
+            "AND (:startDate IS NULL OR :endDate IS NULL OR (DATE(r.startAt) <= DATE(:endDate) AND DATE(r.endAt) >= DATE(:startDate))) " +
             "GROUP BY b " +
             "ORDER BY " +
             "CASE WHEN :sortBy = 'createdAt' AND :order = 'desc' THEN b.createdAt END DESC, " +
             "CASE WHEN :sortBy = 'createdAt' AND :order = 'asc' THEN b.createdAt END ASC, " +
-            "CASE WHEN :sortBy = 'likeCount' AND :order = 'desc' THEN COUNT(l.id) END DESC, " +
-            "CASE WHEN :sortBy = 'likeCount' AND :order = 'asc' THEN COUNT(l.id) END ASC, " +
+            "CASE WHEN :sortBy = 'likes' AND :order = 'desc' THEN COUNT(l.id) END DESC, " +
+            "CASE WHEN :sortBy = 'likes' AND :order = 'asc' THEN COUNT(l.id) END ASC, " +
             "CASE WHEN :sortBy = 'title' AND :order = 'desc' THEN b.title END DESC, " +
             "CASE WHEN :sortBy = 'title' AND :order = 'asc' THEN b.title END ASC")
     List<Object[]> findBoardsByUserWithLikeCountAndCategory(
             @Param("user") UserEntity user,
             @Param("category") BoardEntity.Category category,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate,
             @Param("sortBy") String sortBy,
             @Param("order") String order);
 

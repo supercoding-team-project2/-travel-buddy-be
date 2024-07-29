@@ -64,6 +64,7 @@ public class BoardService {
         log.info("Order: " + order);
 
         List<Object[]> results = boardRepository.findAllWithRepresentativeImageAndDateRange(category, startDate, endDate, sortBy, order);
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
             Integer id = (Integer) result[0];
@@ -79,13 +80,8 @@ public class BoardService {
         }).collect(Collectors.toList());
     }
 
-    public BoardDetailDto getPostDetails(CustomUserDetails userDetails, Integer postId) {
+    public BoardDetailDto getPostDetails(Integer postId) {
         List<Object[]> results = boardRepository.findPostDetailsById(postId);
-        Integer userId = userDetails.getUserId();
-
-        if (userId == null || userId == 0){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다. 로그인 정보를 확인해주세요");
-        }
 
         if (results == null || results.isEmpty()) {
             log.error("No query result found for postId: " + postId);
@@ -143,10 +139,7 @@ public class BoardService {
                 (String) firstRow[21]
         );
 
-        Boolean result = likesService.likeStatus(userId , postId);
-        BoardDetailDto.LikeStatus likeStatus = new BoardDetailDto.LikeStatus(result);
-
-        return new BoardDetailDto(boardDto, routeDto, tripDto, likeStatus);
+        return new BoardDetailDto(boardDto, routeDto, tripDto);
     }
     public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(CustomUserDetails userDetails, BoardEntity.Category category) {
         Integer userId = userDetails.getUserId();
@@ -182,10 +175,10 @@ public class BoardService {
         return new BoardResponseDto<>(message , boardSimpleDtos);
     }
 
-    public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, String sortBy) {
+    public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, Date startDate, Date endDate, String sortBy, String order) {
         Integer userId = userDetails.getUserId();
 
-        List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, sortBy);
+        List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, startDate, endDate, sortBy, order);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return results.stream().map(result -> {
             Integer id = (Integer) result[0];
@@ -323,7 +316,7 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
-    public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, String sortBy, String order) {
+    public BoardResponseDto<BoardAllDto> getParticipatedTripsByUser(CustomUserDetails userDetails , BoardEntity.Category category, Date startDate, Date endDate, String sortBy, String order) {
         Integer userId = userDetails.getUserId();
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저를 찾을 수 없습니다."));
@@ -332,7 +325,7 @@ public class BoardService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "리뷰 카테고리는 조회할 수 없습니다");
         }
 
-        List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, sortBy, order);
+        List<Object[]> results = usersInTravelRepository.findBoardsByUserWithLikeCountAndCategory(user, category, startDate, endDate, sortBy, order);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         List<BoardAllDto> participatedTrips = results.stream().map(result -> {
@@ -377,10 +370,11 @@ public class BoardService {
                 Integer id = (Integer) result[0];
                 String title = (String) result[1];
                 String createdAt = ((LocalDateTime) result[2]).format(formatter);
-                Long likeCount = (Long) result[3];
-                String representativeImage = (String) result[4];
+                String author = (String) result[3];
+                Long likeCount = (Long) result[4];
+                String representativeImage = (String) result[5];
 
-                return new BoardMainSimpleDto(id, title, representativeImage, createdAt, likeCount);
+                return new BoardMainSimpleDto(id, title, representativeImage, author, createdAt, likeCount);
             }).collect(Collectors.toList());
         }
     }
