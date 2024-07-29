@@ -1,11 +1,8 @@
 package com.github.travelbuddy.common.controller;
 
-import com.github.travelbuddy.routes.service.RouteDeleteService;
 import com.github.travelbuddy.routes.dto.RouteDto;
 import com.github.travelbuddy.routes.dto.RoutePutDto;
-import com.github.travelbuddy.routes.service.RoutePostService;
-import com.github.travelbuddy.routes.service.RouteGetService;
-import com.github.travelbuddy.routes.service.RoutePutService;
+import com.github.travelbuddy.routes.service.RouteService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +17,10 @@ import java.util.Map;
 @RequestMapping("/api/routes")
 public class RouteController {
 
-    private final RoutePostService routePostService;
-    private final RouteDeleteService routeDeleteService;
-    private final RouteGetService routeGetService;
-    private final RoutePutService routePutService;
+    private final RouteService routeService;
 
-    public RouteController(RoutePostService routePostService, RouteDeleteService routeDeleteService, RouteGetService routeGetService, RoutePutService routePutService) {
-        this.routePostService = routePostService;
-        this.routeDeleteService = routeDeleteService;
-        this.routeGetService = routeGetService;
-        this.routePutService = routePutService;
+    public RouteController(RouteService routeService) {
+        this.routeService = routeService;
     }
 
     @PostMapping("/add")
@@ -40,10 +31,10 @@ public class RouteController {
             Integer userId = userDetails.getUserId();
 
             if (routeDto != null && routeId == null) {
-                RouteDto createdRoute = routePostService.createRouteWithDaysAndPlaces(routeDto, userId);
+                RouteDto createdRoute = routeService.createRouteWithDaysAndPlaces(routeDto, userId);
                 return ResponseEntity.ok(createdRoute);
             } else if (routeDto != null && routeId != null && !routeDto.getDays().isEmpty()) {
-                RouteDto updatedRoute = routePostService.addRouteDayAndPlaces(routeId, routeDto);
+                RouteDto updatedRoute = routeService.addRouteDayAndPlaces(routeId, routeDto);
                 return ResponseEntity.ok(updatedRoute);
             } else {
                 throw new IllegalArgumentException("잘못된 요청입니다.");
@@ -60,7 +51,7 @@ public class RouteController {
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Integer userId = userDetails.getUserId();
 
-            RoutePutDto updatedRoute = routePutService.putRoute(routeId, routePutDto, userId);
+            RoutePutDto updatedRoute = routeService.putRoute(routeId, routePutDto, userId);
             return ResponseEntity.ok(updatedRoute);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -74,7 +65,7 @@ public class RouteController {
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Integer userId = userDetails.getUserId();
 
-            String boardTitles = routeDeleteService.deleteRoute(routeId, userId);
+            String boardTitles = routeService.deleteRoute(routeId, userId);
 
             if (boardTitles == null) {
                 response.put("message", "성공적으로 삭제되었습니다.");
@@ -96,7 +87,7 @@ public class RouteController {
     @DeleteMapping("/delete-boards/{routeId}")
     public ResponseEntity<String> deleteRouteWithBoards(@PathVariable Integer routeId) {
         try {
-            routeDeleteService.deleteRouteWithBoards(routeId);
+            routeService.deleteRouteWithBoards(routeId);
             return ResponseEntity.ok("성공적으로 삭제되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -109,7 +100,7 @@ public class RouteController {
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Integer userId = userDetails.getUserId();
 
-            List<RouteDto> routes = routeGetService.getRoutesByUserId(userId);
+            List<RouteDto> routes = routeService.getRoutesByUserId(userId);
             return ResponseEntity.ok(routes);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
