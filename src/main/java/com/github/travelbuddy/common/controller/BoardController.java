@@ -115,7 +115,7 @@ public class BoardController {
         return ResponseEntity.ok(participatedTrips);
     }
 
-    @GetMapping("/top6-categories")
+    @GetMapping("/top4-categories")
     public ResponseEntity<BoardMainDto> getTop4BoardsByCategories() {
         BoardMainDto response = boardService.getTop4BoardsByCategories();
         return ResponseEntity.ok(response);
