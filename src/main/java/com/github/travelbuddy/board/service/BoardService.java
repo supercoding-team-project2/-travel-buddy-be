@@ -7,6 +7,7 @@ import com.github.travelbuddy.comment.repository.CommentRepository;
 import com.github.travelbuddy.common.service.S3Service;
 import com.github.travelbuddy.common.util.UUIDUtil;
 import com.github.travelbuddy.likes.repository.LikesRepository;
+import com.github.travelbuddy.likes.service.LikesService;
 import com.github.travelbuddy.postImage.entity.PostImageEntity;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
@@ -52,6 +53,7 @@ public class BoardService {
     private final TripService tripService;
     private final UsersInTravelRepository usersInTravelRepository;
     private final LikesRepository likesRepository;
+    private final LikesService likesService;
     private final CommentRepository commentRepository;
 
     public List<BoardAllDto> getAllBoards(String category, Date startDate, Date endDate, String sortBy, String order) {
@@ -77,8 +79,13 @@ public class BoardService {
         }).collect(Collectors.toList());
     }
 
-    public BoardDetailDto getPostDetails(Integer postId) {
+    public BoardDetailDto getPostDetails(CustomUserDetails userDetails, Integer postId) {
         List<Object[]> results = boardRepository.findPostDetailsById(postId);
+        Integer userId = userDetails.getUserId();
+
+        if (userId == null || userId == 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다. 로그인 정보를 확인해주세요");
+        }
 
         if (results == null || results.isEmpty()) {
             log.error("No query result found for postId: " + postId);
@@ -137,7 +144,10 @@ public class BoardService {
                 (String) firstRow[21]
         );
 
-        return new BoardDetailDto(boardDto, routeDto, tripDto);
+        Boolean result = likesService.likeStatus(userId , postId);
+        BoardDetailDto.LikeStatus likeStatus = new BoardDetailDto.LikeStatus(result);
+
+        return new BoardDetailDto(boardDto, routeDto, tripDto, likeStatus);
     }
     public BoardResponseDto<BoardSimpleDto> getBoardsByUserAndCategory(CustomUserDetails userDetails, BoardEntity.Category category) {
         Integer userId = userDetails.getUserId();
