@@ -2,7 +2,6 @@ package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.likes.service.LikesService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
-import com.github.travelbuddy.users.jwt.JWTUtill;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class LikesController {
     private final LikesService likesService;
-    private final JWTUtill jwtUtill;
+
+    @GetMapping("/info/{postId}")
+    public ResponseEntity<?> likeInfo(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("==================== GET LIKE INFO =========================");
+        return likesService.getLikeInfo(postId, userDetails.getUserId());
+    }
 
     @PostMapping("/{postId}")
     public ResponseEntity<?> likeUp(@PathVariable Integer postId,
