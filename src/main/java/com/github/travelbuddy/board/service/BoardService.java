@@ -93,7 +93,6 @@ public class BoardService {
         }
 
         Object[] firstRow = results.get(0);
-        String authorUUID = UUIDUtil.generateUUIDFromUserId((Integer) firstRow[5]);
 
         BoardDetailDto.BoardDto boardDto = new BoardDetailDto.BoardDto(
                 (Integer) firstRow[0],
@@ -101,7 +100,7 @@ public class BoardService {
                 (String) firstRow[2],
                 (String) firstRow[3],
                 BoardEntity.Category.valueOf((String) firstRow[4]),
-                authorUUID,
+                (Integer) firstRow[5],
                 (String) firstRow[6],
                 (String) firstRow[7],
                 ((Number) firstRow[11]).longValue(),
