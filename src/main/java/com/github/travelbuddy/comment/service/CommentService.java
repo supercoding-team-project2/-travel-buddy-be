@@ -31,9 +31,7 @@ public class CommentService {
 
     public ResponseEntity<?> getAllComments(Integer postId) {
         try {
-            boolean isExistsBoard = boardRepository.existsById(postId);
-            log.info("isExistsBoard = " + isExistsBoard);
-            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
+            checkBoardExists(postId);
 
             BoardEntity boardEntity = boardRepository.findById(postId).get();
 
@@ -42,6 +40,7 @@ public class CommentService {
 
             for (CommentEntity commentEntity : comments) {
                 CommentResponse commentResponse = CommentResponse.builder()
+                        .id(commentEntity.getId())
                         .userName(commentEntity.getUser().getName())
                         .comment(commentEntity.getContent())
                         .profileImgUrl(commentEntity.getUser().getProfilePictureUrl())
@@ -56,13 +55,10 @@ public class CommentService {
                     .commentList(allCommentResponseList)
                     .build();
 
-            System.out.println("allCommentResponse = " + allCommentResponse);
-
             if (allCommentResponse.getCommentList().isEmpty())
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(allCommentResponse);
 
             return ResponseEntity.status(HttpStatus.OK).body(allCommentResponse);
-
         } catch (IllegalArgumentException ie) {
             log.info(ie.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ie.getMessage());
@@ -74,8 +70,7 @@ public class CommentService {
 
     public ResponseEntity<?> addComment(Integer userId, CommentDTO commentDTO, Integer postId) {
         try {
-            boolean isExistsBoard = boardRepository.existsById(postId);
-            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
+            checkBoardExists(postId);
 
             UserEntity userEntity = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
@@ -93,7 +88,6 @@ public class CommentService {
             AddCommentResponse addCommentResponse = AddCommentResponse.builder()
                     .postId(postId)
                     .message("ADD COMMENT COMPLETE")
-                    .commentResponse(new CommentResponse(commentDTO.getContent(), userEntity.getName(), userEntity.getProfilePictureUrl()))
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK).body(addCommentResponse);
@@ -108,26 +102,17 @@ public class CommentService {
 
     public ResponseEntity<?> modifyComment(Integer postId, Integer commentId, CommentDTO commentDTO) {
         try {
-            boolean isExistsBoard = boardRepository.existsById(postId);
-            boolean isExistsComment = commentRepository.existsById(commentId);
-            log.info("isExistsBoard: " + isExistsBoard);
-            log.info("isExistsComment = " + isExistsComment);
-
-            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
-            if (!isExistsComment) throw new EntityNotFoundException("존재하지 않는 댓글입니다.");
+            checkBoardExists(postId);
+            checkCommentExists(commentId);
 
             CommentEntity commentEntity = commentRepository.findById(commentId).get();
 
             commentEntity.setContent(commentDTO.getContent());
             commentRepository.save(commentEntity);
 
-            CommentResponse commentResponse =
-                    new CommentResponse(commentDTO.getContent(), commentEntity.getUser().getName(), commentEntity.getUser().getProfilePictureUrl());
-
             ModifyCommentResponse modifyCommentResponse = ModifyCommentResponse.builder()
                     .postId(postId)
                     .message("MODIFY COMMENT COMPLETED")
-                    .commentResponse(commentResponse)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK).body(modifyCommentResponse);
@@ -142,13 +127,8 @@ public class CommentService {
 
     public ResponseEntity<?> deleteComment(Integer postId, Integer commentId) {
         try {
-            boolean isExistsBoard = boardRepository.existsById(postId);
-            boolean isExistsComment = commentRepository.existsById(commentId);
-            log.info("isExistsBoard: " + isExistsBoard);
-            log.info("isExistsComment = " + isExistsComment);
-
-            if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
-            if (!isExistsComment) throw new EntityNotFoundException("존재하지 않는 댓글입니다.");
+            checkBoardExists(postId);
+            checkCommentExists(commentId);
 
             CommentEntity commentEntity = commentRepository.findById(commentId).get();
 
@@ -162,5 +142,15 @@ public class CommentService {
             log.info(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    public void checkBoardExists(Integer postId) {
+        boolean isExistsBoard = boardRepository.existsById(postId);
+        if (!isExistsBoard) throw new EntityNotFoundException("존재하지 않는 게시판입니다.");
+    }
+
+    private void checkCommentExists(Integer commentId) {
+        boolean isExistsComment = commentRepository.existsById(commentId);
+        if (!isExistsComment) throw new EntityNotFoundException("존재하지 않는 댓글입니다.");
     }
 }

@@ -1,4 +1,4 @@
-package com.github.travelbuddy.users.dto;
+package com.github.travelbuddy.users.dto.sms;
 
 import lombok.Getter;
 

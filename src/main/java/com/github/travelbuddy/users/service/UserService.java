@@ -7,16 +7,20 @@ import com.github.travelbuddy.users.dto.UserResponse;
 import com.github.travelbuddy.users.dto.UserInfoResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.enums.Gender;
-import com.github.travelbuddy.users.enums.Role;
-import com.github.travelbuddy.users.enums.Status;
+import com.github.travelbuddy.users.handler.CustomSuccessHandler;
 import com.github.travelbuddy.users.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +35,7 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final MessageService messageService;
     private final S3Service s3Service;
+    private final CustomSuccessHandler customSuccessHandler;
 
     @Value("${profile.url}")
     private String defaultProfileUrl;
@@ -143,5 +148,32 @@ public class UserService {
 
         userRepository.save(updatedUserEntity);
         return ResponseEntity.ok(new UserResponse("비밀번호 변경이 완료되었습니다."));
+    }
+
+    public ResponseEntity<?> oauth2JwtHeader(HttpServletRequest request, HttpServletResponse response) {
+        log.info("oauth2JwtHeader requestURI: {}",request.getRequestURI());
+        log.info("oauth2JwtHeader requestMethod: {}",request.getMethod());
+        log.info("oauth2JwtHeader headerName: {}",request.getHeader("Authorization"));
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+
+        if(cookies == null){
+            log.info("cookie null");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("cookie null");
+        }
+        for(Cookie cookie : cookies){
+            if(cookie.getName().equals("Authorization")){
+                token = cookie.getValue();
+            }
+        }
+
+        if(token == null){
+            log.info("token null");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("token null");
+        }
+
+        response.addCookie(customSuccessHandler.createCookies("Authorization",null,0));
+        response.addHeader("Authorization", "Bearer " + token);
+        return ResponseEntity.status(HttpStatus.OK).body("token을 헤더에 담아 전달 완료");
     }
 }

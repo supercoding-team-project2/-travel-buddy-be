@@ -2,14 +2,19 @@ package com.github.travelbuddy.routes.service;
 
 import com.github.travelbuddy.board.entity.BoardEntity;
 import com.github.travelbuddy.board.repository.BoardRepository;
-import com.github.travelbuddy.postImage.entity.PostImageEntity;
+import com.github.travelbuddy.comment.repository.CommentRepository;
+import com.github.travelbuddy.likes.repository.LikesRepository;
 import com.github.travelbuddy.postImage.repository.PostImageRepository;
 import com.github.travelbuddy.routes.entity.RouteEntity;
 import com.github.travelbuddy.routes.repository.RouteRepository;
+import com.github.travelbuddy.trip.entity.TripEntity;
+import com.github.travelbuddy.trip.repository.TripRepository;
+import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,11 +24,25 @@ public class RouteDeleteService {
     private final RouteRepository routeRepository;
     private final BoardRepository boardRepository;
     private final PostImageRepository postImageRepository;
+    private final CommentRepository commentRepository;
+    private final LikesRepository likesRepository;
+    private final UsersInTravelRepository usersInTravelRepository;
+    private final TripRepository tripRepository;
 
-    public RouteDeleteService(RouteRepository routeRepository, BoardRepository boardRepository, PostImageRepository postImageRepository) {
+    public RouteDeleteService(RouteRepository routeRepository,
+                              BoardRepository boardRepository,
+                              PostImageRepository postImageRepository,
+                              CommentRepository commentRepository,
+                              LikesRepository likesRepository,
+                              UsersInTravelRepository usersInTravelRepository,
+                              TripRepository tripRepository) {
         this.routeRepository = routeRepository;
         this.boardRepository = boardRepository;
         this.postImageRepository = postImageRepository;
+        this.commentRepository = commentRepository;
+        this.likesRepository = likesRepository;
+        this.usersInTravelRepository = usersInTravelRepository;
+        this.tripRepository = tripRepository;
     }
 
     public String deleteRoute(Integer routeId, Integer userId) {
@@ -54,14 +73,18 @@ public class RouteDeleteService {
         List<BoardEntity> boards = route.getBoards();
 
         for (BoardEntity board : boards) {
-            List<PostImageEntity> postImages = board.getPostImages();
-            for (PostImageEntity postImage : postImages) {
-                postImageRepository.delete(postImage);
-            }
+            Optional<TripEntity> optionalTrip = tripRepository.findByBoard(board);
+            if (optionalTrip.isPresent()) {
+                TripEntity trip = optionalTrip.get();
 
+                usersInTravelRepository.deleteAllByTrip(trip);
+                tripRepository.delete(trip);
+            }
+            postImageRepository.deleteAllByBoard(board);
+            commentRepository.deleteAllByBoard(board);
+            likesRepository.deleteAllByBoard(board);
             boardRepository.delete(board);
         }
-
         routeRepository.delete(route);
     }
 }

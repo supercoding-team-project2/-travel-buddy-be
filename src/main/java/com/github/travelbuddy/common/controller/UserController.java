@@ -1,8 +1,12 @@
 package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.users.dto.*;
+import com.github.travelbuddy.users.dto.sms.SmsCheckRequestDto;
+import com.github.travelbuddy.users.dto.sms.SmsSendRequestDto;
 import com.github.travelbuddy.users.service.MessageService;
 import com.github.travelbuddy.users.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -50,7 +54,7 @@ public class UserController {
 
     @PostMapping("/signup/sms/send")
     public ResponseEntity<UserResponse> sendSms(@RequestBody SmsSendRequestDto request){
-        log.info("회원가입 전 문자인증 코드 발송");
+        log.info("회원가입 전 문자인증 코드 발송 /signup/sms/send");
         return messageService.sendSms(request.getPhoneNum());
     }
 
@@ -92,5 +96,12 @@ public class UserController {
         log.info("/password/update");
         ResponseEntity<UserResponse> response = userService.updatePassword(request);
         return response;
+    }
+
+    //oAuth2 로그인시 쿠키로 jwt를 담아 보내는데 다시 헤더로 담아 보내기 위함
+    @PostMapping("/oauth2-jwt-header")
+    public ResponseEntity<?> oauth2JwtHeader(HttpServletRequest request, HttpServletResponse response){
+        log.info("/oauth2-jwt-header");
+        return userService.oauth2JwtHeader(request, response);
     }
 }
