@@ -362,16 +362,16 @@ public class BoardService {
         }
         }
 
-        public BoardMainDto getTop6BoardsByCategories() {
-            List<BoardMainSimpleDto> top6ReviewBoards = getTop6BoardsByCategory(BoardEntity.Category.REVIEW, "likeCount");
-            List<BoardMainSimpleDto> top6GuideBoards = getTop6BoardsByCategory(BoardEntity.Category.GUIDE, "createdAt");
-            List<BoardMainSimpleDto> top6CompanionBoards = getTop6BoardsByCategory(BoardEntity.Category.COMPANION, "createdAt");
+        public BoardMainDto getTop4BoardsByCategories() {
+            List<BoardMainSimpleDto> top4ReviewBoards = getTop4BoardsByCategory(BoardEntity.Category.REVIEW, "likeCount");
+            List<BoardMainSimpleDto> top4GuideBoards = getTop4BoardsByCategory(BoardEntity.Category.GUIDE, "createdAt");
+            List<BoardMainSimpleDto> top4CompanionBoards = getTop4BoardsByCategory(BoardEntity.Category.COMPANION, "createdAt");
 
-            return new BoardMainDto(top6ReviewBoards, top6GuideBoards, top6CompanionBoards);
+            return new BoardMainDto(top4ReviewBoards, top4GuideBoards, top4CompanionBoards);
         }
 
-        private List<BoardMainSimpleDto> getTop6BoardsByCategory(BoardEntity.Category category, String sortBy) {
-            List<Object[]> results = boardRepository.findTop6BoardsByCategoryWithRepresentativeImage(category, sortBy);
+        private List<BoardMainSimpleDto> getTop4BoardsByCategory(BoardEntity.Category category, String sortBy) {
+            List<Object[]> results = boardRepository.findTop4BoardsByCategoryWithRepresentativeImage(category, sortBy);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             return results.stream().map(result -> {
