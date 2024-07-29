@@ -68,4 +68,13 @@ public class LikesService {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SYSTEM ERROR");
     }
+
+    public boolean likeStatus(Integer userId , Integer postId){
+        LikesEntity likesEntity = likesRepository.findByUserIdAndBoardId(userId , postId);
+        if (likesEntity == null){
+            return false;
+        }else {
+            return true;
+        }
+    }
 }
