@@ -378,10 +378,11 @@ public class BoardService {
                 Integer id = (Integer) result[0];
                 String title = (String) result[1];
                 String createdAt = ((LocalDateTime) result[2]).format(formatter);
-                Long likeCount = (Long) result[3];
-                String representativeImage = (String) result[4];
+                String author = (String) result[3];
+                Long likeCount = (Long) result[4];
+                String representativeImage = (String) result[5];
 
-                return new BoardMainSimpleDto(id, title, representativeImage, createdAt, likeCount);
+                return new BoardMainSimpleDto(id, title, representativeImage, author, createdAt, likeCount);
             }).collect(Collectors.toList());
         }
     }

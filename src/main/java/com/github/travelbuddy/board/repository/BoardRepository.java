@@ -82,9 +82,10 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
             @Param("sortBy") String sortBy,
             @Param("order") String order);
 
-    @Query("SELECT b.id, b.title, b.createdAt, COUNT(l.id) as likeCount," +
+    @Query("SELECT b.id, b.title, b.createdAt, u.name, COUNT(l.id) as likeCount," +
             "(SELECT pi.url FROM PostImageEntity pi WHERE pi.board.id = b.id ORDER BY pi.id LIMIT 1) as representativeImage " +
             "FROM BoardEntity b LEFT JOIN LikesEntity l ON b.id = l.board.id " +
+            "JOIN UserEntity u ON b.user.id = u.id " +
             "WHERE b.category = :category " +
             "GROUP BY b.id, b.title, b.createdAt " +
             "ORDER BY " +
