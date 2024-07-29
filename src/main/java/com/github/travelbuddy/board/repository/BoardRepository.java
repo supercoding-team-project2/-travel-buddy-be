@@ -80,8 +80,8 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
             "ORDER BY " +
             "CASE WHEN :sortBy = 'likeCount' THEN COUNT(l.id) END DESC, " +
             "CASE WHEN :sortBy = 'createdAt' THEN b.createdAt END DESC " +
-            "LIMIT 6")
-    List<Object[]> findTop6BoardsByCategoryWithRepresentativeImage(
+            "LIMIT 4")
+    List<Object[]> findTop4BoardsByCategoryWithRepresentativeImage(
             @Param("category") BoardEntity.Category category,
             @Param("sortBy") String sortBy);
 

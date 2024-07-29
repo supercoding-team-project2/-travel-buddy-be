@@ -110,8 +110,8 @@ public class BoardController {
     }
 
     @GetMapping("/top6-categories")
-    public ResponseEntity<BoardMainDto> getTop6BoardsByCategories() {
-        BoardMainDto response = boardService.getTop6BoardsByCategories();
+    public ResponseEntity<BoardMainDto> getTop4BoardsByCategories() {
+        BoardMainDto response = boardService.getTop4BoardsByCategories();
         return ResponseEntity.ok(response);
     }
 }
