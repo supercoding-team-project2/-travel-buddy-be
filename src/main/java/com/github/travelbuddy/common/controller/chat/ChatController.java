@@ -55,6 +55,18 @@ public class ChatController {
         String opponentId = String.valueOf(chatRoomEnterDto.getOpponentId());
 
         String chatRoomId = chatRoomService.getChatRoomId(myId, opponentId, true).get();
+        log.info("chatRoomId = " + chatRoomId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ChatRoomOpenResponse(chatRoomId));
+    }
+
+    @PostMapping("/api/chat/room/{chatRoomId}")
+    public ResponseEntity<?> getChatRoomData(@PathVariable String chatRoomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("============= GET CHAT ROOM DATA ===============");
+        String opponentId = chatRoomId.split("-")[1];
+        log.info("opponentId = " + opponentId);
+
+        log.info("chatRoomId = " + chatRoomId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ChatRoomOpenResponse(chatRoomId));
     }
