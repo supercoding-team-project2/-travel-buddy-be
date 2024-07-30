@@ -25,16 +25,32 @@ public class JWTUtill {
     }
 
     public Boolean isExpired(String token) {
-        try {
+//        try {
+//        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+//        } catch (ExpiredJwtException e) {
+//            System.err.println("Token is expired");
+//            return true;
+//        }
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
-        } catch (ExpiredJwtException e) {
-            System.err.println("Token is expired");
-            return true;
-        }
     }
 
-    public String createJwt(Integer userId, Long expiredMs){
+//    //단일토큰
+//    public String createJwt(Integer userId, Long expiredMs){
+//        return Jwts.builder()
+//                .claim("userId",userId)
+//                .issuedAt(new Date(System.currentTimeMillis()))
+//                .expiration(new Date(System.currentTimeMillis()+expiredMs))
+//                .signWith(secretKey)
+//                .compact();
+//    }
+
+    public String getCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+    }
+
+    public String createJwt(String category, Integer userId, Long expiredMs){
         return Jwts.builder()
+                .claim("category", category)
                 .claim("userId",userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()+expiredMs))
