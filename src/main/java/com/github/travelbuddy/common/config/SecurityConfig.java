@@ -5,6 +5,7 @@ import com.github.travelbuddy.users.handler.CustomSuccessHandler;
 import com.github.travelbuddy.users.jwt.JWTFilter;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.jwt.LoginFilter;
+import com.github.travelbuddy.users.repository.RefreshRepository;
 import com.github.travelbuddy.users.service.CustomOAuth2UserService;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,7 @@ public class SecurityConfig {
     private final ChatUserService chatUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
+    private final RefreshRepository refreshRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)throws Exception {
@@ -107,7 +109,7 @@ public class SecurityConfig {
 //                .addFilterBefore(new JWTFilter(jwtUtill), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill, chatUserService);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill, chatUserService,refreshRepository);
         loginFilter.setFilterProcessesUrl("/api/user/login");
 
         http
