@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class BoardAllDto {
     private Integer id;
-    private BoardEntity.Category categoryEnum;
+    private BoardEntity.Category category;
     private String title;
     private String summary;
     private String author;
