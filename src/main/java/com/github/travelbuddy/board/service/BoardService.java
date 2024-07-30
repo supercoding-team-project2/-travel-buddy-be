@@ -2,6 +2,7 @@ package com.github.travelbuddy.board.service;
 
 import com.github.travelbuddy.board.dto.*;
 import com.github.travelbuddy.board.entity.BoardEntity;
+import com.github.travelbuddy.board.mapper.BoardMapper;
 import com.github.travelbuddy.board.repository.BoardRepository;
 import com.github.travelbuddy.comment.repository.CommentRepository;
 import com.github.travelbuddy.common.service.S3Service;
@@ -22,6 +23,7 @@ import com.github.travelbuddy.users.repository.UserRepository;
 import com.github.travelbuddy.usersInTravel.repository.UsersInTravelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,21 +65,30 @@ public class BoardService {
         log.info("SortBy: " + sortBy);
         log.info("Order: " + order);
 
-        List<Object[]> results = boardRepository.findAllWithRepresentativeImageAndDateRange(category, startDate, endDate, sortBy, order);
+        BoardEntity.Category categoryEnum = category != null ? BoardEntity.Category.valueOf(category) : null;
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return results.stream().map(result -> {
-            Integer id = (Integer) result[0];
-            BoardEntity.Category categoryEnum = BoardEntity.Category.valueOf((String) result[1]);
-            String title = (String) result[2];
-            String summary = (String) result[3];
-            String author = (String) result[4];
-            String startAt = dateFormat.format((Date) result[5]);
-            String endAt = dateFormat.format((Date) result[6]);
-            String representativeImage = (String) result[7];
-            Long likeCount = (Long) result[8];
-            return new BoardAllDto(id , categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
+        List<BoardEntity> boardEntities;
+        if ("likes".equals(sortBy)) {
+            boardEntities = boardRepository.findAllWithRepresentativeImageAndDateRange(categoryEnum, startDate, endDate, Sort.unsorted());
+        } else {
+            Sort sort = Sort.by(Sort.Order.by(sortBy).with(Sort.Direction.fromString(order)));
+            boardEntities = boardRepository.findAllWithRepresentativeImageAndDateRange(categoryEnum, startDate, endDate, sort);
+        }
+
+        List<BoardAllDto> boardDtos = boardEntities.stream().map(board -> {
+            BoardAllDto dto = BoardMapper.INSTANCE.boardEntityToBoardAllDto(board);
+            Long likeCount = boardRepository.countLikesByBoardId(board.getId());
+            dto.setLikeCount(likeCount);
+            return dto;
         }).collect(Collectors.toList());
+
+        if ("likes".equals(sortBy)) {
+            boardDtos = boardDtos.stream()
+                    .sorted((b1, b2) -> "desc".equals(order) ? b2.getLikeCount().compareTo(b1.getLikeCount()) : b1.getLikeCount().compareTo(b2.getLikeCount()))
+                    .collect(Collectors.toList());
+        }
+
+        return boardDtos;
     }
 
     public BoardDetailDto getPostDetails(Integer postId) {
