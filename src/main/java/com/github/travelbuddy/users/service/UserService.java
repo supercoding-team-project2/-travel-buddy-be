@@ -5,11 +5,9 @@ import com.github.travelbuddy.users.dto.SignupDto;
 import com.github.travelbuddy.users.dto.UpdatePasswordRequest;
 import com.github.travelbuddy.users.dto.UserResponse;
 import com.github.travelbuddy.users.dto.UserInfoResponse;
-import com.github.travelbuddy.users.entity.RefreshEntity;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.enums.Gender;
 import com.github.travelbuddy.users.jwt.JWTUtill;
-import com.github.travelbuddy.users.repository.RefreshRepository;
 import com.github.travelbuddy.users.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -38,7 +36,6 @@ public class UserService {
     private final MessageService messageService;
     private final S3Service s3Service;
     private final JWTUtill jwtUtill;
-    private final RefreshRepository refreshRepository;
 
     @Value("${profile.url}")
     private String defaultProfileUrl;
@@ -187,78 +184,4 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.OK).body("token을 헤더에 담아 전달 완료");
     }
 
-    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = request.getHeader("refresh");
-        if (refreshToken == null) {
-            return new ResponseEntity<>("refresh token is null", HttpStatus.BAD_REQUEST);
-        }
-
-        String refresh = refreshToken.split(" ")[1];
-
-        try {
-            jwtUtill.isExpired(refresh);
-        }catch (ExpiredJwtException e){
-            return new ResponseEntity<>("refresh token expired",HttpStatus.BAD_REQUEST);
-        }
-
-        String category = jwtUtill.getCategory(refresh);
-
-        if(!category.equals("refresh")){
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
-        }
-
-        Boolean isExist = refreshRepository.existsByRefresh(refresh);
-        if(!isExist){
-            return new ResponseEntity<>("refresh token don't exist", HttpStatus.BAD_REQUEST);
-        }
-
-        Integer userId = jwtUtill.getUserId(refresh);
-        String newAccess = jwtUtill.createJwt("access",userId,5*60*1000L);
-        String newRefresh = jwtUtill.createJwt("refresh",userId,10*60*60*1000L);
-
-        refreshRepository.deleteByRefresh(refresh);
-
-        Date date = new Date(System.currentTimeMillis()+10*60*60*1000L);
-
-        RefreshEntity refreshEntity = new RefreshEntity();
-        refreshEntity.setUserId(userId);
-        refreshEntity.setRefresh(newRefresh);
-        refreshEntity.setExpiration(date.toString());
-        refreshRepository.save(refreshEntity);
-
-        response.addHeader("Authorization", "Bearer " + newAccess);
-
-        return new ResponseEntity<>("Bearer "+newRefresh ,HttpStatus.OK);
-    }
-
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        String refreshToken = request.getHeader("refresh");
-
-        if (refreshToken == null) {
-//            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ResponseEntity<>("refresh token is null", HttpStatus.BAD_REQUEST);
-        }
-
-        String refresh = refreshToken.split(" ")[1];
-        try {
-            jwtUtill.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            return new ResponseEntity<>("refresh token is expired", HttpStatus.BAD_REQUEST);
-        }
-
-        String category = jwtUtill.getCategory(refresh);
-        if (!category.equals("refresh")) {
-            return new ResponseEntity<>("This token is not refresh token", HttpStatus.BAD_REQUEST);
-        }
-
-        Boolean isExist = refreshRepository.existsByRefresh(refresh);
-        if (!isExist) {
-            return new ResponseEntity<>("refresh token doesn't exist", HttpStatus.BAD_REQUEST);
-        }
-        //로그아웃 진행
-        //Refresh 토큰 DB에서 제거
-        refreshRepository.deleteByRefresh(refresh);
-
-        return new ResponseEntity<>("로그아웃 완료",HttpStatus.OK);
-    }
 }

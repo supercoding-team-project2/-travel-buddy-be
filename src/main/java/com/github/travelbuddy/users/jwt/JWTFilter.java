@@ -57,10 +57,10 @@ public class JWTFilter extends OncePerRequestFilter {
         }catch (ExpiredJwtException e) {
 
             Map<String, String> responseBody = new HashMap<>();
-            responseBody.put("message", "access 토큰이 만료되었습니다.");
+            responseBody.put("message", "access token is expired");
 
             PrintWriter writer = response.getWriter();
-            writer.println("access token expired");
+//            writer.println("access token expired");
 
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonResponse = objectMapper.writeValueAsString(responseBody);
@@ -69,15 +69,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
             response.getWriter().write(jsonResponse);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        String category = jwtUtill.getCategory(token);
-        if(!category.equals("access")) {
-            PrintWriter writer = response.getWriter();
-            writer.println("invalid access token");
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 

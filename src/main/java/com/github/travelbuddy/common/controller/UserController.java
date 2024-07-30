@@ -99,19 +99,10 @@ public class UserController {
     }
 
     //oAuth2 로그인시 쿠키로 jwt를 담아 보내는데 다시 헤더로 담아 보내기 위함
-    @PostMapping("/oauth2-jwt-header")
-    public ResponseEntity<?> oauth2JwtHeader(HttpServletRequest request, HttpServletResponse response){
-        log.info("/oauth2-jwt-header");
-        return userService.oauth2JwtHeader(request, response);
-    }
+//    @PostMapping("/oauth2-jwt-header")
+//    public ResponseEntity<?> oauth2JwtHeader(HttpServletRequest request, HttpServletResponse response){
+//        log.info("/oauth2-jwt-header");
+//        return userService.oauth2JwtHeader(request, response);
+//    }
 
-    @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        return userService.reissue(request, response);
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        return userService.logout(request);
-    }
 }

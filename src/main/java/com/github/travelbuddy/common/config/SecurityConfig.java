@@ -5,7 +5,6 @@ import com.github.travelbuddy.users.handler.CustomSuccessHandler;
 import com.github.travelbuddy.users.jwt.JWTFilter;
 import com.github.travelbuddy.users.jwt.JWTUtill;
 import com.github.travelbuddy.users.jwt.LoginFilter;
-import com.github.travelbuddy.users.repository.RefreshRepository;
 import com.github.travelbuddy.users.service.CustomOAuth2UserService;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,13 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -39,7 +36,6 @@ public class SecurityConfig {
     private final ChatUserService chatUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
-    private final RefreshRepository refreshRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)throws Exception {
@@ -109,7 +105,7 @@ public class SecurityConfig {
 //                .addFilterBefore(new JWTFilter(jwtUtill), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill, chatUserService,refreshRepository);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtill, chatUserService);
         loginFilter.setFilterProcessesUrl("/api/user/login");
 
         http

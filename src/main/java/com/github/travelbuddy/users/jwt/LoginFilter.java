@@ -3,15 +3,11 @@ package com.github.travelbuddy.users.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.travelbuddy.chat.service.ChatUserService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
-import com.github.travelbuddy.users.entity.RefreshEntity;
-import com.github.travelbuddy.users.repository.RefreshRepository;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,7 +15,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +25,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtill jwtUtill;
     private final ChatUserService chatUserService;
-    private final RefreshRepository refreshRepository;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -57,38 +51,26 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 //        String token = jwtUtill.createJwt(userId,5*60*60*1000L);
 
-        String token = jwtUtill.createJwt("access", userId,5*60*1000L);
-        String refresh = jwtUtill.createJwt("refresh", userId, 5*60*60*1000L);
+        String token = jwtUtill.createJwt(userId,60*60*1000L);
 
 //        response.setHeader("access", access);
 //        response.addCookie(createCookie("refresh",refresh));
 //        response.setStatus(HttpStatus.OK.value());
 
         try {
-//            Map<String, String> responseBody = new HashMap<>();
-//            responseBody.put("message", "로그인에 성공하였습니다.");
-//            responseBody.put("refresh", "Bearer "+refresh);
-
-            response.getWriter().write("Bearer " + refresh);
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("message", "로그인에 성공하였습니다.");
 
             response.addHeader("Authorization", "Bearer " + token);
 
-            Date date = new Date(System.currentTimeMillis()+10*60*60*1000L);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponse = objectMapper.writeValueAsString(responseBody);
 
-            RefreshEntity refreshEntity = new RefreshEntity();
-            refreshEntity.setUserId(userId);
-            refreshEntity.setRefresh(refresh);
-            refreshEntity.setExpiration(date.toString());
-            refreshRepository.save(refreshEntity);
-
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String jsonResponse = objectMapper.writeValueAsString(responseBody);
-
-//            response.setContentType("application/json;charset=UTF-8");
+            response.setContentType("application/json;charset=UTF-8");
 
             chatUserService.addUser(token);
 
-//            response.getWriter().write(jsonResponse);
+            response.getWriter().write(jsonResponse);
         }catch (IOException e){
             e.printStackTrace();
         }
