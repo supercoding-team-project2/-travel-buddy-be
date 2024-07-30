@@ -104,4 +104,14 @@ public class UserController {
         log.info("/oauth2-jwt-header");
         return userService.oauth2JwtHeader(request, response);
     }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+        return userService.reissue(request, response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        return userService.logout(request);
+    }
 }
