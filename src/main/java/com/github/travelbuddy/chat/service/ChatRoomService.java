@@ -15,14 +15,14 @@ import java.util.Optional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
 
-    public Optional<String> getChatRoomId(String senderId, String recipientId, boolean createNewRoomIfNotExists) {
+    public Optional<String> getChatRoomId(String senderId, String opponentId, boolean createNewRoomIfNotExists) {
         log.info("senderId = " + senderId);
-        log.info("recipientId = " + recipientId);
-        return chatRoomRepository.findBySenderIdAndRecipientId(senderId, recipientId)
+        log.info("opponentId = " + opponentId);
+        return chatRoomRepository.findBySenderIdAndRecipientId(senderId, opponentId)
                 .map(ChatRoom::getChatId)
                 .or(() -> {
                     if(createNewRoomIfNotExists) {
-                        String chatId = createChatId(senderId, recipientId);
+                        String chatId = createChatId(senderId, opponentId);
                         return Optional.of(chatId);
                     }
                     return Optional.empty();
