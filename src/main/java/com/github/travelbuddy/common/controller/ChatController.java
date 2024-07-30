@@ -1,4 +1,4 @@
-package com.github.travelbuddy.common.controller.chat;
+package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.chat.dto.ChatRoomEnterDto;
 import com.github.travelbuddy.chat.entity.ChatMessage;
