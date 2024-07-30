@@ -18,7 +18,8 @@ public class ChatMessageService {
     private final ChatRoomService chatRoomService;
 
     public ChatMessage save(ChatMessage chatMessage) {
-        String chatId = chatRoomService.getChatRoomId(chatMessage.getSenderName(), chatMessage.getRecipientName(), true)
+        log.info("chatMessage.getTimestamp() = " + chatMessage.getTimeStamp());
+        String chatId = chatRoomService.getChatRoomId(chatMessage.getSenderId(), chatMessage.getOpponentId(), true)
                 .orElseThrow();
         log.info("chatId = " + chatId);
 
