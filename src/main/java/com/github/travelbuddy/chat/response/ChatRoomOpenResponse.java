@@ -1,14 +1,18 @@
 package com.github.travelbuddy.chat.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.github.travelbuddy.chat.entity.ChatMessage;
+import lombok.*;
+
+import java.util.List;
 
 @Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRoomOpenResponse {
-    private String chatRoomId;
+    private String senderId;
+    private String opponentName;
+    private String opponentId;
+    private String opponentProfile;
+    private List<ChatMessage> messages;
 }
