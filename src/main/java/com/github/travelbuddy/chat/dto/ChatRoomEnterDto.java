@@ -8,6 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRoomEnterDto {
-    private Integer myId;
+    private Integer senderId;
     private Integer opponentId;
 }
