@@ -26,18 +26,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Integer userId = customUserDetails.getUserId();
 
-        String token = jwtUtill.createJwt(userId,5*60*60*1000L);
+        String token = jwtUtill.createJwt(userId,60*60*1000L);
 
-        response.addCookie(createCookies("Authorization",token,5*60*60*1000));
-        response.sendRedirect("http://localhost:3000/oauth2-jwt");
-    }
-    public Cookie createCookies(String key, String value, Integer expiration) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(expiration);
-//        cookie.setSecure(true);  // https만 쿠키 사용가능
-        cookie.setPath("/"); // 전역에서 쿠키를 볼 수 있음
-        cookie.setHttpOnly(true); // javaScript가 해당 쿠키를 가져가지 못하게 함
-
-        return cookie;
+        response.sendRedirect("https://travelbuddy1.vercel.app/oauth2-jwt?token=Bearer "+token);
     }
 }

@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -27,6 +29,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
+        System.out.println("attemptAuthentication");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
@@ -41,16 +44,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)  {
 
+        log.info("로그인 성공 필터");
         CustomUserDetails customUserDetails =(CustomUserDetails) authentication.getPrincipal();
 
         Integer userId = customUserDetails.getUserId();
 
-        String token = jwtUtill.createJwt(userId,5*60*60*1000L);
+//        String token = jwtUtill.createJwt(userId,5*60*60*1000L);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        String token = jwtUtill.createJwt(userId,60*60*1000L);
+
+//        response.setHeader("access", access);
+//        response.addCookie(createCookie("refresh",refresh));
+//        response.setStatus(HttpStatus.OK.value());
+
         try {
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("message", "로그인에 성공하였습니다.");
+
+            response.addHeader("Authorization", "Bearer " + token);
 
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonResponse = objectMapper.writeValueAsString(responseBody);
@@ -85,6 +96,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             e.printStackTrace();
         }
     }
-
 
 }

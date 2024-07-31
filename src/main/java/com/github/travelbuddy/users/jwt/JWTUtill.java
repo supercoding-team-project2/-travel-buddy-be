@@ -25,14 +25,16 @@ public class JWTUtill {
     }
 
     public Boolean isExpired(String token) {
-        try {
+//        try {
+//        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+//        } catch (ExpiredJwtException e) {
+//            System.err.println("Token is expired");
+//            return true;
+//        }
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
-        } catch (ExpiredJwtException e) {
-            System.err.println("Token is expired");
-            return true;
-        }
     }
 
+    //단일토큰
     public String createJwt(Integer userId, Long expiredMs){
         return Jwts.builder()
                 .claim("userId",userId)
@@ -41,4 +43,5 @@ public class JWTUtill {
                 .signWith(secretKey)
                 .compact();
     }
+
 }
