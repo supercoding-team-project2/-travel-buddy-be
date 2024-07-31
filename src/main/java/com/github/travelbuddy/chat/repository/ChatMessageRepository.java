@@ -7,5 +7,6 @@ import java.math.BigInteger;
 import java.util.List;
 
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, BigInteger> {
-    List<ChatMessage> findByChatId(String s);
+//    List<ChatMessage> findByChatId(String s);
+    List<ChatMessage> findAllBySenderIdAndChatId(String senderId, String chatRoomId);
 }

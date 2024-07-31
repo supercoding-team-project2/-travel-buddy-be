@@ -3,6 +3,7 @@ package com.github.travelbuddy.common.controller;
 import com.github.travelbuddy.chat.dto.ChatRoomEnterDto;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
+import com.github.travelbuddy.chat.entity.ChatRoom;
 import com.github.travelbuddy.chat.response.ChatRoomFindResponse;
 import com.github.travelbuddy.chat.response.ChatRoomOpenResponse;
 import com.github.travelbuddy.chat.service.ChatMessageService;
@@ -74,14 +75,13 @@ public class ChatController {
     public ResponseEntity<?> getChatRoomData(@PathVariable String chatRoomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("============= GET CHAT ROOM DATA ===============");
         String senderId = String.valueOf(userDetails.getUserId());
+
         String opponentId = chatRoomId.split("_")[1];
-
         UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).orElseThrow(() -> new RuntimeException("존재하지 않는 상대방입니다."));
-
         String opponentName = opponentUserEntity.getName();
         String opponentProfile = opponentUserEntity.getProfilePictureUrl();
 
-        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, opponentId);
+        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatRoomId);
 
         ChatRoomOpenResponse chatRoomOpenResponse = ChatRoomOpenResponse.builder()
                 .senderId(senderId)
