@@ -1,7 +1,5 @@
 package com.github.travelbuddy.chat.handler;
 
-import com.github.travelbuddy.users.jwt.JWTUtill;
-import com.github.travelbuddy.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
