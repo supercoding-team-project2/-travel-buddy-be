@@ -1,6 +1,7 @@
 package com.github.travelbuddy.chat.service;
 
 import com.github.travelbuddy.chat.entity.ChatMessage;
+import com.github.travelbuddy.chat.entity.ChatRoom;
 import com.github.travelbuddy.chat.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class ChatMessageService {
     private final ChatMessageRepository repository;
     private final ChatRoomService chatRoomService;
+    private final ChatMessageRepository chatMessageRepository;
 
     public ChatMessage save(ChatMessage chatMessage) {
         log.info("chatMessage.getTimestamp() = " + chatMessage.getTimeStamp());
@@ -29,9 +31,7 @@ public class ChatMessageService {
         return chatMessage;
     }
 
-    public List<ChatMessage> findChatMessages(String senderId, String recipientId) {
-        Optional<String> chatId = chatRoomService.getChatRoomId(senderId, recipientId, false);
-
-        return chatId.map(repository::findByChatId).orElse(new ArrayList<>());
+    public List<ChatMessage> findChatMessages(String senderId, String chatId) {
+        return chatMessageRepository.findAllBySenderIdAndChatId(senderId, chatId);
     }
 }
