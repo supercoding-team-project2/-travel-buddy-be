@@ -53,11 +53,15 @@ public class ChatController {
     @PostMapping("/api/chat/room/enter")
     public ResponseEntity<?> findChatRoom(@RequestBody ChatRoomEnterDto chatRoomEnterDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("============= FIND CHAT ROOM ===============");
+        log.info("chatRoomEnterDto: " + chatRoomEnterDto);
 
-        String myId = String.valueOf(chatRoomEnterDto.getMyId());
+        String senderId = String.valueOf(chatRoomEnterDto.getSenderId());
+        log.info("senderId In controller: " + senderId);
+
         String opponentId = String.valueOf(chatRoomEnterDto.getOpponentId());
+        log.info("opponentId In controller: " + opponentId);
 
-        String chatRoomId = chatRoomService.getChatRoomId(myId, opponentId, true).get();
+        String chatRoomId = chatRoomService.getChatRoomId(senderId, opponentId, true).get();
         log.info("chatRoomId = " + chatRoomId);
         ChatRoomFindResponse chatRoomFindResponse = new ChatRoomFindResponse();
         chatRoomFindResponse.setChatRoomId(chatRoomId);
