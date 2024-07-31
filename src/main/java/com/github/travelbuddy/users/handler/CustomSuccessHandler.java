@@ -28,6 +28,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String token = jwtUtill.createJwt(userId,60*60*1000L);
 
-        response.sendRedirect("http://localhost:3000/oauth2-jwt?token=Bearer "+token);
+        response.sendRedirect("https://travelbuddy1.vercel.app/oauth2-jwt?token=Bearer "+token);
     }
 }
