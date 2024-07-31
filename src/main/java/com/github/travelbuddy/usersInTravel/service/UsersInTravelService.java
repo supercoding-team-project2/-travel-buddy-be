@@ -90,4 +90,12 @@ public class UsersInTravelService {
         trip.setParticipantCount(trip.getParticipantCount() - 1);
         tripRepository.save(trip);
     }
+
+    public Boolean participantTrip(CustomUserDetails userDetails, Integer tripId) {
+        Integer userId = userDetails.getUserId();
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저 찾을 수 없음"));
+        TripEntity trip = tripRepository.findById(tripId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"여행 찾을 수 없음"));
+
+        return usersInTravelRepository.findByUserAndTrip(user, trip).isPresent();
+    }
 }
