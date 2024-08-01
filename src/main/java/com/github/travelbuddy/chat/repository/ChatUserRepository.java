@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ChatUserRepository extends MongoRepository<ChatUser, String> {
     ChatUser findByUserName(String userName);
+    ChatUser findByUserId(Integer userId);
     List<ChatUser> findAllByStatus(Status status);
     boolean existsByUserName(String userName);
 }

@@ -1,7 +1,10 @@
 package com.github.travelbuddy.chat.service;
 
 import com.github.travelbuddy.chat.entity.ChatRoom;
+import com.github.travelbuddy.chat.entity.ChatUser;
+import com.github.travelbuddy.chat.enums.Status;
 import com.github.travelbuddy.chat.repository.ChatRoomRepository;
+import com.github.travelbuddy.chat.repository.ChatUserRepository;
 import com.github.travelbuddy.chat.response.GetAllRoomsForUserResponse;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.repository.UserRepository;
@@ -18,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatUserRepository chatUserRepository;
     private final UserRepository userRepository;
 
     public Optional<String> getChatRoomId(String senderId, String opponentId, boolean createNewRoomIfNotExists) {
@@ -71,9 +75,11 @@ public class ChatRoomService {
                 UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).get();
                 String opponentName = opponentUserEntity.getName();
 
-                GetAllRoomsForUserResponse getAllRoomsForUserResponse = new GetAllRoomsForUserResponse(chatId, opponentName);
-                chatRoomsForUserResponse.add(getAllRoomsForUserResponse);
+                ChatUser chatUser = chatUserRepository.findByUserId(Integer.valueOf(opponentId));
+                Status status = chatUser.getStatus();
 
+                GetAllRoomsForUserResponse getAllRoomsForUserResponse = new GetAllRoomsForUserResponse(chatId, opponentName, status);
+                chatRoomsForUserResponse.add(getAllRoomsForUserResponse);
             }
         }
 

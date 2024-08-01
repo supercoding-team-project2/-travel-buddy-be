@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,11 +19,8 @@ public class ChatUserService {
     private final JWTUtill jwtUtill;
     private final UserRepository userRepository;
     private final ChatUserRepository chatUserRepository;
-    List<ChatUser> chatUserList = new ArrayList<>();
 
     public void addUser(String token) {
-        log.info("=================== ADD CHATUSER ===================");
-
         try {
             Integer userId = jwtUtill.getUserId(token);
             UserEntity userEntity = userRepository.findById(userId)
@@ -39,6 +35,7 @@ public class ChatUserService {
             } else {
                 ChatUser chatUser = new ChatUser();
                 chatUser.setUserName(userName);
+                chatUser.setUserId(userId);
                 chatUser.setStatus(Status.ONLINE);
 
                 chatUserRepository.save(chatUser);
@@ -49,10 +46,7 @@ public class ChatUserService {
         }
     }
 
-    public void disconnect(String token) {
-        log.info("token: " + token);
-
-        Integer userId = jwtUtill.getUserId(token);
+    public void disconnect(Integer userId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
         String userName = userEntity.getName();
