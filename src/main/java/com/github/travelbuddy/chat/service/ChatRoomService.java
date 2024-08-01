@@ -30,20 +30,20 @@ public class ChatRoomService {
     private String createChatId(String myId, String opponentId) {
         String chatRoomId = String.format("%s_%s", myId, opponentId);
 
-        ChatRoom senderRecipient = ChatRoom.builder()
+        ChatRoom senderOpponent = ChatRoom.builder()
                 .chatId(chatRoomId)
                 .senderId(myId)
                 .recipientId(opponentId)
                 .build();
 
-        ChatRoom recipientSender = ChatRoom.builder()
+        ChatRoom opponentSender = ChatRoom.builder()
                 .chatId(chatRoomId)
                 .senderId(opponentId)
                 .recipientId(myId)
                 .build();
 
-        chatRoomRepository.save(senderRecipient);
-        chatRoomRepository.save(recipientSender);
+        chatRoomRepository.save(senderOpponent);
+        chatRoomRepository.save(opponentSender);
 
         return chatRoomId;
     }
