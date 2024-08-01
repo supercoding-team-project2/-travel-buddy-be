@@ -24,10 +24,6 @@ public class LikesService {
     private final BoardRepository boardRepository;
 
     public ResponseEntity<?> processLike(Integer postId, Integer userId, String method) {
-        log.info("==================== processLike ====================");
-        log.info("postId = " + postId);
-        log.info("userId = " + userId);
-
         if (method.equals("POST")) {
             UserEntity userEntity = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
@@ -85,10 +81,7 @@ public class LikesService {
         BoardEntity boardEntity = boardRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시물 " + postId + " 를 찾을 수 없습니다."));
 
-        log.info("게시물 ID: " + boardEntity.getId());
-
         Integer likeCount = likesRepository.countAllByBoard(boardEntity);
-        log.info("likeCount = " + likeCount);
 
         LikeInfoResponse likeInfoResponse = LikeInfoResponse.builder()
                 .count(likeCount)

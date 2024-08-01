@@ -50,21 +50,20 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.OK).body(chatRoomFindResponse);
     }
 
-    @GetMapping("/api/chat/room/{chatRoomId}")
-    public ResponseEntity<?> getChatRoomData(@PathVariable String chatRoomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    @GetMapping("/api/chat/room/{chatId}")
+    public ResponseEntity<?> getChatRoomData(@PathVariable String chatId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("============= GET CHAT ROOM DATA ===============");
-        String senderId = String.valueOf(userDetails.getUserId());
+        String senderId = String.valueOf(userDetails.getUserId());  log.info("senderId = " + senderId);
+        String opponentId = chatId.split("_")[1];   log.info("opponentId = " + opponentId);
 
-        String opponentId = chatRoomId.split("_")[1];
         UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).orElseThrow(() -> new RuntimeException("존재하지 않는 상대방입니다."));
         String opponentName = opponentUserEntity.getName();
         String opponentProfile = opponentUserEntity.getProfilePictureUrl();
 
-        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatRoomId);
+        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatId);
         for (ChatMessage chatMessage : chatMessages) {
             log.info("chatMessage.getContent(): " + chatMessage.getContent());
         }
-
 
         ChatRoomOpenResponse chatRoomOpenResponse = ChatRoomOpenResponse.builder()
                 .senderId(senderId)
