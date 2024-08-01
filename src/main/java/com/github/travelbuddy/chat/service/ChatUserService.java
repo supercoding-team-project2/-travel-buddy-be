@@ -32,6 +32,8 @@ public class ChatUserService {
             if (isExistChatUser) {
                 ChatUser chatUser = chatUserRepository.findByUserName(userName);
                 chatUser.setStatus(Status.ONLINE);
+
+                chatUserRepository.save(chatUser);
             } else {
                 ChatUser chatUser = new ChatUser();
                 chatUser.setUserName(userName);
