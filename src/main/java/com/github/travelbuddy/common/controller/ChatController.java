@@ -78,7 +78,6 @@ public class ChatController {
     @MessageMapping("/chat/send")
     public void processMessage(@Payload ChatMessage chatMessage) {
         ChatMessage savedMessage = chatMessageService.save(chatMessage);
-        String chatId = chatMessage.getChatId();
 
         String chatRoomId = chatMessage.getChatId();
         String destination = "/subscribe/" + chatRoomId + "/queue/messages";
