@@ -73,7 +73,12 @@ public class ChatController {
         String opponentName = opponentUserEntity.getName();
         String opponentProfile = opponentUserEntity.getProfilePictureUrl();
 
-        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatId);
+//        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatId);
+//        for (ChatMessage chatMessage : chatMessages) {
+//            log.info("chatMessage.getContent(): " + chatMessage.getContent());
+//        }
+
+        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(chatId);
         for (ChatMessage chatMessage : chatMessages) {
             log.info("chatMessage.getContent(): " + chatMessage.getContent());
         }
