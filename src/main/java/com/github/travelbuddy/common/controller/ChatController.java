@@ -8,6 +8,7 @@ import com.github.travelbuddy.chat.response.ChatRoomOpenResponse;
 import com.github.travelbuddy.chat.response.GetAllRoomsForUserResponse;
 import com.github.travelbuddy.chat.service.ChatMessageService;
 import com.github.travelbuddy.chat.service.ChatRoomService;
+import com.github.travelbuddy.chat.service.ChatUserService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
 import com.github.travelbuddy.users.entity.UserEntity;
 import com.github.travelbuddy.users.repository.UserRepository;
@@ -29,6 +30,7 @@ import java.util.List;
 public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageService chatMessageService;
+    private final ChatUserService chatUserService;
     private final ChatRoomService chatRoomService;
     private final UserRepository userRepository;
 
@@ -97,5 +99,11 @@ public class ChatController {
         List<GetAllRoomsForUserResponse> chatRoomsForUserResponse = chatRoomService.getAllChatRooms(userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(chatRoomsForUserResponse);
+    }
+
+    @PostMapping("/api/chat/disconnect")
+    public ResponseEntity<?> disconnectUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        chatUserService.disconnect(userDetails.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).body("로그아웃 후 OFFLINE");
     }
 }
