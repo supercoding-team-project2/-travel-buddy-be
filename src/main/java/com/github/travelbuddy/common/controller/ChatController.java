@@ -103,6 +103,7 @@ public class ChatController {
 
     @PostMapping("/api/chat/disconnect")
     public ResponseEntity<?> disconnectUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("=========== DISCONNECT USER ===========");
         chatUserService.disconnect(userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body("로그아웃 후 OFFLINE");
     }

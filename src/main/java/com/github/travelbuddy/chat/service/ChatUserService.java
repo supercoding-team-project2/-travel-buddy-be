@@ -53,6 +53,8 @@ public class ChatUserService {
 
         ChatUser chatUser = chatUserRepository.findByUserName(userName);
         chatUser.setStatus(Status.OFFLINE);
+
+        chatUserRepository.save(chatUser);
     }
 
     public List<ChatUser> findConnectedUsers() {
