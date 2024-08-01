@@ -3,9 +3,9 @@ package com.github.travelbuddy.common.controller;
 import com.github.travelbuddy.chat.dto.ChatRoomEnterDto;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
-import com.github.travelbuddy.chat.entity.ChatRoom;
 import com.github.travelbuddy.chat.response.ChatRoomFindResponse;
 import com.github.travelbuddy.chat.response.ChatRoomOpenResponse;
+import com.github.travelbuddy.chat.response.GetAllRoomsForUserResponse;
 import com.github.travelbuddy.chat.service.ChatMessageService;
 import com.github.travelbuddy.chat.service.ChatRoomService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
@@ -36,11 +36,9 @@ public class ChatController {
     public ResponseEntity<?> enterChatRoom(@RequestBody ChatRoomEnterDto chatRoomEnterDto) {
         String senderId = String.valueOf(chatRoomEnterDto.getSenderId());
         String opponentId = String.valueOf(chatRoomEnterDto.getOpponentId());
-
         String chatRoomId = chatRoomService.getChatRoomId(senderId, opponentId, true).get();
-        ChatRoomFindResponse chatRoomFindResponse = new ChatRoomFindResponse();
-        chatRoomFindResponse.setChatRoomId(chatRoomId);
-        chatRoomFindResponse.setMessage("SUCCESS");
+
+        ChatRoomFindResponse chatRoomFindResponse = new ChatRoomFindResponse(chatRoomId, "SUCCESS");
 
         return ResponseEntity.status(HttpStatus.OK).body(chatRoomFindResponse);
     }
@@ -96,8 +94,8 @@ public class ChatController {
     @GetMapping("/api/chatRooms")
     public ResponseEntity<?> getAllChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Integer userId = userDetails.getUserId();
-        List<ChatRoom> chatRooms = chatRoomService.getAllChatRooms(userId);
+        List<GetAllRoomsForUserResponse> chatRoomsForUserResponse = chatRoomService.getAllChatRooms(userId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(chatRooms);
+        return ResponseEntity.status(HttpStatus.OK).body(chatRoomsForUserResponse);
     }
 }
