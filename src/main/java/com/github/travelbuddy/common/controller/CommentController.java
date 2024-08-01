@@ -19,7 +19,6 @@ public class CommentController {
 
     @GetMapping("/{postId}")
     public ResponseEntity<?> getAllComments(@PathVariable Integer postId) {
-        log.info("=================== GET ALL COMMENT ===================");
         return commentService.getAllComments(postId);
     }
 
@@ -28,7 +27,6 @@ public class CommentController {
                                         @RequestBody CommentDTO commentDTO,
                                         @PathVariable Integer postId
     ) {
-        log.info("=================== ADD COMMENT ===================");
         return commentService.addComment(userDetails.getUserId(), commentDTO, postId);
     }
 
@@ -36,13 +34,11 @@ public class CommentController {
     public ResponseEntity<?> modifyComment(@PathVariable Integer postId,
                                         @PathVariable Integer commentId,
                                         @RequestBody CommentDTO commentDTO) {
-        log.info("=================== MODIFY COMMENT ===================");
         return commentService.modifyComment(postId, commentId, commentDTO);
     }
 
     @DeleteMapping("/delete/{postId}/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Integer postId, @PathVariable Integer commentId) {
-        log.info("=================== DELETE COMMENT ===================");
         return commentService.deleteComment(postId, commentId);
     }
 }

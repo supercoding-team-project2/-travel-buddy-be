@@ -18,7 +18,6 @@ public class LikesController {
 
     @GetMapping("/info/{postId}")
     public ResponseEntity<?> likeInfo(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        log.info("==================== GET LIKE INFO =========================");
         return likesService.getLikeInfo(postId, userDetails.getUserId());
     }
 
@@ -26,7 +25,6 @@ public class LikesController {
     public ResponseEntity<?> likeUp(@PathVariable Integer postId,
                                     @AuthenticationPrincipal CustomUserDetails userDetails,
                                     HttpServletRequest request) {
-        log.info(request.getMethod());
         return likesService.processLike(postId, userDetails.getUserId(), request.getMethod());
     }
 
@@ -34,7 +32,6 @@ public class LikesController {
     public ResponseEntity<?> likeDown(@PathVariable Integer postId,
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          HttpServletRequest request) {
-        log.info(request.getMethod());
         return likesService.processLike(postId, userDetails.getUserId(), request.getMethod());
     }
 }

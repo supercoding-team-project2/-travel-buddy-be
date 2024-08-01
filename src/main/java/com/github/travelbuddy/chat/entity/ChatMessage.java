@@ -22,8 +22,5 @@ public class ChatMessage {
     private String senderId;
     private String opponentId;
     private String content;
-
-    // TODO : 날짜 값 / 타입 변경......
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date timeStamp;
+    private String timeStamp;
 }
