@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -47,5 +48,18 @@ public class ChatRoomService {
         chatRoomRepository.save(recipientSender);
 
         return chatRoomId;
+    }
+
+    public List<ChatRoom> getAllChatRooms(Integer userId) {
+        List<ChatRoom> allChatRoomsInDB = chatRoomRepository.findAll();
+        log.info("allChatRoomsInDB.size(): " + allChatRoomsInDB.size());
+
+        for(ChatRoom chatRoom : allChatRoomsInDB) {
+            String chatId = chatRoom.getChatId();
+            log.info("chatId : " + chatId);
+
+        }
+
+        return null;
     }
 }

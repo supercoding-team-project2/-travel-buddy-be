@@ -3,6 +3,7 @@ package com.github.travelbuddy.common.controller;
 import com.github.travelbuddy.chat.dto.ChatRoomEnterDto;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
+import com.github.travelbuddy.chat.entity.ChatRoom;
 import com.github.travelbuddy.chat.response.ChatRoomFindResponse;
 import com.github.travelbuddy.chat.response.ChatRoomOpenResponse;
 import com.github.travelbuddy.chat.service.ChatMessageService;
@@ -53,8 +54,20 @@ public class ChatController {
     @GetMapping("/api/chat/room/{chatId}")
     public ResponseEntity<?> getChatRoomData(@PathVariable String chatId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("============= GET CHAT ROOM DATA ===============");
-        String senderId = String.valueOf(userDetails.getUserId());  log.info("senderId = " + senderId);
-        String opponentId = chatId.split("_")[1];   log.info("opponentId = " + opponentId);
+        // chat_Id = 9_55
+        String senderId = String.valueOf(userDetails.getUserId());  // 55
+        String opponentId = null;
+        String idx0 = chatId.split("_")[0];
+        String idx1 = chatId.split("_")[1];
+
+        if(senderId.equals(idx0)) {
+            opponentId = chatId.split("_")[1];
+        }else if(senderId.equals(idx1)) {
+            opponentId = chatId.split("_")[0];
+        }
+
+        log.info("sederId In getChatRoomData: " + senderId);
+        log.info("opponentId In getChatRoomData: " + opponentId);
 
         UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).orElseThrow(() -> new RuntimeException("존재하지 않는 상대방입니다."));
         String opponentName = opponentUserEntity.getName();
@@ -93,5 +106,13 @@ public class ChatController {
                         .content(savedMessage.getContent())
                         .build()
         );
+    }
+
+    @GetMapping("/api/chatRooms")
+    public ResponseEntity<?> getAllChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("============= GET CHAT ROOM LIST ===============");
+        Integer userId = userDetails.getUserId();  log.info("userId = " + userId);
+
+        List<ChatRoom> chatRooms = chatRoomService.getAllChatRooms(userId);
     }
 }
