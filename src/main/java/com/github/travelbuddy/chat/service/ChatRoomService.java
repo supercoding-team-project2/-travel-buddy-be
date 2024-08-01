@@ -16,8 +16,6 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
 
     public Optional<String> getChatRoomId(String senderId, String opponentId, boolean createNewRoomIfNotExists) {
-        log.info("senderId = " + senderId);
-        log.info("opponentId = " + opponentId);
         return chatRoomRepository.findBySenderIdAndRecipientId(senderId, opponentId)
                 .map(ChatRoom::getChatId)
                 .or(() -> {
