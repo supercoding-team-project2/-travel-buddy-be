@@ -3,7 +3,7 @@ package com.github.travelbuddy.common.controller;
 import com.github.travelbuddy.chat.dto.ChatRoomEnterDto;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
-import com.github.travelbuddy.chat.response.ChatRoomFindResponse;
+import com.github.travelbuddy.chat.response.ChatRoomEnterResponse;
 import com.github.travelbuddy.chat.response.ChatRoomOpenResponse;
 import com.github.travelbuddy.chat.response.GetAllRoomsForUserResponse;
 import com.github.travelbuddy.chat.service.ChatMessageService;
@@ -38,9 +38,9 @@ public class ChatController {
         String opponentId = String.valueOf(chatRoomEnterDto.getOpponentId());
         String chatRoomId = chatRoomService.getChatRoomId(senderId, opponentId, true).get();
 
-        ChatRoomFindResponse chatRoomFindResponse = new ChatRoomFindResponse(chatRoomId, "SUCCESS");
+        ChatRoomEnterResponse chatRoomEnterResponse = new ChatRoomEnterResponse(chatRoomId, "SUCCESS");
 
-        return ResponseEntity.status(HttpStatus.OK).body(chatRoomFindResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(chatRoomEnterResponse);
     }
 
     @GetMapping("/api/chat/room/{chatId}")
