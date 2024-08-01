@@ -2,7 +2,6 @@ package com.github.travelbuddy.chat.service;
 
 import com.github.travelbuddy.chat.entity.ChatRoom;
 import com.github.travelbuddy.chat.repository.ChatRoomRepository;
-import com.github.travelbuddy.common.util.UUIDUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,13 +29,7 @@ public class ChatRoomService {
     }
 
     private String createChatId(String myId, String opponentId) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(myId);
-        sb.append("_");
-        sb.append(opponentId);
-        sb.append("_");
-        sb.append(UUIDUtil.generateUUIDFromUserId(Integer.valueOf(myId)));
-        String chatRoomId = sb.toString();
+        String chatRoomId = String.format("%s_%s", myId, opponentId);
 
         ChatRoom senderRecipient = ChatRoom.builder()
                 .chatId(chatRoomId)

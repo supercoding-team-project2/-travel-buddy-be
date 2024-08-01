@@ -3,7 +3,6 @@ package com.github.travelbuddy.common.controller;
 import com.github.travelbuddy.chat.dto.ChatRoomEnterDto;
 import com.github.travelbuddy.chat.entity.ChatMessage;
 import com.github.travelbuddy.chat.dto.ChatNotification;
-import com.github.travelbuddy.chat.entity.ChatRoom;
 import com.github.travelbuddy.chat.response.ChatRoomFindResponse;
 import com.github.travelbuddy.chat.response.ChatRoomOpenResponse;
 import com.github.travelbuddy.chat.service.ChatMessageService;
@@ -32,28 +31,8 @@ public class ChatController {
     private final ChatRoomService chatRoomService;
     private final UserRepository userRepository;
 
-    @MessageMapping("/chat/send")
-    public void processMessage(@Payload ChatMessage chatMessage) {
-        log.info("=================== /publish/send ===================");
-
-        ChatMessage savedMessage = chatMessageService.save(chatMessage);
-        log.info("savedMessage = " + savedMessage);
-
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getOpponentId(), // user
-                "queue/messages",             // destination
-                ChatNotification.builder()    // payload
-                        .id(String.valueOf(savedMessage.getId()))
-                        .senderId(savedMessage.getSenderId())
-                        .recipientId(savedMessage.getOpponentId())
-                        .content(savedMessage.getContent())
-                        .build()
-        );
-    }
-
     @PostMapping("/api/chat/room/enter")
-    public ResponseEntity<?> findChatRoom(@RequestBody ChatRoomEnterDto chatRoomEnterDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        log.info("============= FIND CHAT ROOM ===============");
+    public ResponseEntity<?> enterChatRoom(@RequestBody ChatRoomEnterDto chatRoomEnterDto) {
         log.info("chatRoomEnterDto: " + chatRoomEnterDto);
 
         String senderId = String.valueOf(chatRoomEnterDto.getSenderId());
@@ -82,6 +61,10 @@ public class ChatController {
         String opponentProfile = opponentUserEntity.getProfilePictureUrl();
 
         List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatRoomId);
+        for (ChatMessage chatMessage : chatMessages) {
+            log.info("chatMessage.getContent(): " + chatMessage.getContent());
+        }
+
 
         ChatRoomOpenResponse chatRoomOpenResponse = ChatRoomOpenResponse.builder()
                 .senderId(senderId)
@@ -92,5 +75,24 @@ public class ChatController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(chatRoomOpenResponse);
+    }
+
+    @MessageMapping("/chat/send")
+    public void processMessage(@Payload ChatMessage chatMessage) {
+        log.info("=================== /publish/send ===================");
+
+        ChatMessage savedMessage = chatMessageService.save(chatMessage);
+        log.info("savedMessage = " + savedMessage);
+
+        messagingTemplate.convertAndSendToUser(
+                chatMessage.getOpponentId(), // user
+                "queue/messages",             // destination
+                ChatNotification.builder()    // payload
+                        .id(String.valueOf(savedMessage.getId()))
+                        .senderId(savedMessage.getSenderId())
+                        .recipientId(savedMessage.getOpponentId())
+                        .content(savedMessage.getContent())
+                        .build()
+        );
     }
 }
