@@ -96,12 +96,14 @@ public class ChatController {
         log.info("savedMessage = " + savedMessage);
         String chatId = chatMessage.getChatId();
 
-//        `/subscribe/${ChatRoomId}/queue/messages/`,
-        messagingTemplate.convertAndSendToUser(
-//                chatMessage.getOpponentId(), // user
-                chatId,
-                "queue/messages",             // destination
-                ChatNotification.builder()    // payload
+        // 클라이언트가 구독하는 채팅방의 ID를 가져옵니다.
+        String chatRoomId = chatMessage.getChatId();
+        // 메시지를 전송할 목적지 경로를 설정합니다.
+        String destination = "/subscribe/" + chatRoomId + "/queue/messages";
+        // ChatNotification을 생성하여 메시지를 보냅니다.
+        messagingTemplate.convertAndSend(
+                destination,
+                ChatNotification.builder()
                         .id(String.valueOf(savedMessage.getId()))
                         .senderId(savedMessage.getSenderId())
                         .recipientId(savedMessage.getOpponentId())
@@ -110,7 +112,8 @@ public class ChatController {
         );
 
 //        messagingTemplate.convertAndSendToUser(
-//                chatMessage.getOpponentId(), // user
+////                chatMessage.getOpponentId(), // user
+//                chatId,
 //                "queue/messages",             // destination
 //                ChatNotification.builder()    // payload
 //                        .id(String.valueOf(savedMessage.getId()))
