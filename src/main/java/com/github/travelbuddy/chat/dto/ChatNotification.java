@@ -8,9 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class ChatNotification {
-    private String id;
+    private String roomId;
     private String senderId;
-    private String recipientId;
+    private String opponentId;
     private String content;
-    private String timestamp;
+    private String timeStamp;
 }

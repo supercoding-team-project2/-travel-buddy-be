@@ -104,11 +104,11 @@ public class ChatController {
         messagingTemplate.convertAndSend(
                 destination,
                 ChatNotification.builder()
-                        .id(String.valueOf(savedMessage.getId()))
+                        .roomId(String.valueOf(savedMessage.getId()))
                         .senderId(savedMessage.getSenderId())
-                        .recipientId(savedMessage.getOpponentId())
+                        .opponentId(savedMessage.getOpponentId())
                         .content(savedMessage.getContent())
-                        .timestamp(savedMessage.getTimeStamp())
+                        .timeStamp(savedMessage.getTimeStamp())
                         .build()
         );
 
