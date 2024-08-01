@@ -187,24 +187,37 @@ public class BoardService {
     }
 
     public List<BoardAllDto> getLikedPostsByUser(CustomUserDetails userDetails, BoardEntity.Category category, Date startDate, Date endDate, String sortBy, String order) {
+        log.info("UserId: " + userDetails.getUserId());
+        log.info("Category: " + category);
+        log.info("StartDate: " + startDate);
+        log.info("EndDate: " + endDate);
+        log.info("SortBy: " + sortBy);
+        log.info("Order: " + order);
+
         Integer userId = userDetails.getUserId();
 
-        List<Object[]> results = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, startDate, endDate, sortBy, order);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return results.stream().map(result -> {
-            Integer id = (Integer) result[0];
-            BoardEntity.Category categoryEnum = (BoardEntity.Category) result[1];
-            String title = (String) result[2];
-            String summary = (String) result[3];
-            String author = (String) result[4];
-            String startAt = dateFormat.format((Date) result[5]);
-            String endAt = dateFormat.format((Date) result[6]);
-            Long likeCount = (Long) result[7];
-            String representativeImage = (String) result[8];
-            return new BoardAllDto(id, categoryEnum, title, summary, author, startAt, endAt, representativeImage, likeCount);
+        List<BoardEntity> boardEntities;
+        if ("likes".equals(sortBy)) {
+            boardEntities = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, startDate, endDate , Sort.unsorted());
+        } else {
+            Sort sort = Sort.by(Sort.Order.by(sortBy).with(Sort.Direction.fromString(order)));
+            boardEntities = boardRepository.findLikedPostsByUserIdAndCategory(userId, category, startDate, endDate , sort);
+        }
+
+        List<BoardAllDto> boardDtos = boardEntities.stream().map(board -> {
+            BoardAllDto dto = BoardMapper.INSTANCE.boardEntityToBoardAllDto(board);
+            Long likeCount = boardRepository.countLikesByBoardId(board.getId());
+            dto.setLikeCount(likeCount);
+            return dto;
         }).collect(Collectors.toList());
 
+        if ("likes".equals(sortBy)) {
+            boardDtos = boardDtos.stream()
+                    .sorted((b1, b2) -> "desc".equals(order) ? b2.getLikeCount().compareTo(b1.getLikeCount()) : b1.getLikeCount().compareTo(b2.getLikeCount()))
+                    .collect(Collectors.toList());
+        }
 
+        return boardDtos;
     }
 
     @Transactional
