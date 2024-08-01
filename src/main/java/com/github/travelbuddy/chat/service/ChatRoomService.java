@@ -52,7 +52,6 @@ public class ChatRoomService {
 
     public List<ChatRoom> getAllChatRooms(Integer userId) {
         List<ChatRoom> allChatRoomsInDB = chatRoomRepository.findAll();
-        log.info("allChatRoomsInDB.size(): " + allChatRoomsInDB.size());
 
         for(ChatRoom chatRoom : allChatRoomsInDB) {
             String chatId = chatRoom.getChatId();
