@@ -24,7 +24,7 @@ public class ChatRoomService {
         return chatRoomRepository.findBySenderIdAndRecipientId(senderId, opponentId)
                 .map(ChatRoom::getChatId)
                 .or(() -> {
-                    if(createNewRoomIfNotExists) {
+                    if (createNewRoomIfNotExists) {
                         String chatId = createChatId(senderId, opponentId);
                         return Optional.of(chatId);
                     }
@@ -55,24 +55,28 @@ public class ChatRoomService {
 
 
     public List<GetAllRoomsForUserResponse> getAllChatRooms(Integer userId) {
-        List<GetAllRoomsForUserResponse> chatRoomForUserList = new ArrayList<>();
+        List<GetAllRoomsForUserResponse> chatRoomsForUserResponse = new ArrayList<>();
         List<ChatRoom> allChatRoomsInDB = chatRoomRepository.findAll();
 
         String keyId = String.valueOf(userId);
         List<ChatRoom> chatRoomsForUser = allChatRoomsInDB.stream()
                 .filter(chatRoom -> chatRoom.getChatId().contains(keyId)).toList();
 
-        for(ChatRoom chatRoom : chatRoomsForUser) {
-            String chatId = chatRoom.getChatId(); log.info("chatId : " + chatId);
-            String opponentId = chatRoom.getRecipientId();
+        for (ChatRoom chatRoom : chatRoomsForUser) {
+            String chatId = chatRoom.getChatId();
 
-            UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).get();
-            String opponentName = opponentUserEntity.getName();
+            if (chatRoom.getSenderId().equals(keyId)) {
+                String opponentId = chatRoom.getRecipientId();
 
-            GetAllRoomsForUserResponse getAllRoomsForUserResponse = new GetAllRoomsForUserResponse(chatId, opponentName);
-            chatRoomForUserList.add(getAllRoomsForUserResponse);
+                UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).get();
+                String opponentName = opponentUserEntity.getName();
+
+                GetAllRoomsForUserResponse getAllRoomsForUserResponse = new GetAllRoomsForUserResponse(chatId, opponentName);
+                chatRoomsForUserResponse.add(getAllRoomsForUserResponse);
+
+            }
         }
 
-        return chatRoomForUserList;
+        return chatRoomsForUserResponse;
     }
 }
