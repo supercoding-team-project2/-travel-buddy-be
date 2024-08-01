@@ -54,8 +54,7 @@ public class ChatController {
     @GetMapping("/api/chat/room/{chatId}")
     public ResponseEntity<?> getChatRoomData(@PathVariable String chatId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info("============= GET CHAT ROOM DATA ===============");
-        // chat_Id = 9_55
-        String senderId = String.valueOf(userDetails.getUserId());  // 55
+        String senderId = String.valueOf(userDetails.getUserId());
         String opponentId = null;
         String idx0 = chatId.split("_")[0];
         String idx1 = chatId.split("_")[1];
@@ -72,11 +71,6 @@ public class ChatController {
         UserEntity opponentUserEntity = userRepository.findById(Integer.valueOf(opponentId)).orElseThrow(() -> new RuntimeException("존재하지 않는 상대방입니다."));
         String opponentName = opponentUserEntity.getName();
         String opponentProfile = opponentUserEntity.getProfilePictureUrl();
-
-//        List<ChatMessage> chatMessages = chatMessageService.findChatMessages(senderId, chatId);
-//        for (ChatMessage chatMessage : chatMessages) {
-//            log.info("chatMessage.getContent(): " + chatMessage.getContent());
-//        }
 
         List<ChatMessage> chatMessages = chatMessageService.findChatMessages(chatId);
         for (ChatMessage chatMessage : chatMessages) {
@@ -100,9 +94,12 @@ public class ChatController {
 
         ChatMessage savedMessage = chatMessageService.save(chatMessage);
         log.info("savedMessage = " + savedMessage);
+        String chatId = chatMessage.getChatId();
 
+//        `/subscribe/${ChatRoomId}/queue/messages/`,
         messagingTemplate.convertAndSendToUser(
-                chatMessage.getOpponentId(), // user
+//                chatMessage.getOpponentId(), // user
+                chatId,
                 "queue/messages",             // destination
                 ChatNotification.builder()    // payload
                         .id(String.valueOf(savedMessage.getId()))
@@ -111,6 +108,17 @@ public class ChatController {
                         .content(savedMessage.getContent())
                         .build()
         );
+
+//        messagingTemplate.convertAndSendToUser(
+//                chatMessage.getOpponentId(), // user
+//                "queue/messages",             // destination
+//                ChatNotification.builder()    // payload
+//                        .id(String.valueOf(savedMessage.getId()))
+//                        .senderId(savedMessage.getSenderId())
+//                        .recipientId(savedMessage.getOpponentId())
+//                        .content(savedMessage.getContent())
+//                        .build()
+//        );
     }
 
     @GetMapping("/api/chatRooms")
