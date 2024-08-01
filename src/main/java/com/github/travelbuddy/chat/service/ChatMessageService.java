@@ -32,6 +32,6 @@ public class ChatMessageService {
     }
 
     public List<ChatMessage> findChatMessages(String chatId) {
-        return chatMessageRepository.findAllChatId(chatId);
+        return chatMessageRepository.findAllByChatId(chatId);
     }
 }
