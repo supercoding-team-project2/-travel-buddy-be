@@ -114,5 +114,7 @@ public class ChatController {
         Integer userId = userDetails.getUserId();  log.info("userId = " + userId);
 
         List<ChatRoom> chatRooms = chatRoomService.getAllChatRooms(userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(chatRooms);
     }
 }
