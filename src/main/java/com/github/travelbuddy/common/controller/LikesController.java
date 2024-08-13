@@ -2,7 +2,6 @@ package com.github.travelbuddy.common.controller;
 
 import com.github.travelbuddy.likes.service.LikesService;
 import com.github.travelbuddy.users.dto.CustomUserDetails;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +22,13 @@ public class LikesController {
 
     @PostMapping("/{postId}")
     public ResponseEntity<?> likeUp(@PathVariable Integer postId,
-                                    @AuthenticationPrincipal CustomUserDetails userDetails,
-                                    HttpServletRequest request) {
-        return likesService.processLike(postId, userDetails.getUserId(), request.getMethod());
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return likesService.processLikeUp(postId, userDetails.getUserId());
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> likeDown(@PathVariable Integer postId,
-                         @AuthenticationPrincipal CustomUserDetails userDetails,
-                         HttpServletRequest request) {
-        return likesService.processLike(postId, userDetails.getUserId(), request.getMethod());
+                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return likesService.processLikeDown(postId, userDetails.getUserId());
     }
 }

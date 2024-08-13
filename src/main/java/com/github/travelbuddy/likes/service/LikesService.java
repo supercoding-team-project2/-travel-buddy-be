@@ -23,54 +23,51 @@ public class LikesService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
 
-    public ResponseEntity<?> processLike(Integer postId, Integer userId, String method) {
-        if (method.equals("POST")) {
-            UserEntity userEntity = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
+    public ResponseEntity<?> processLikeUp(Integer postId, Integer userId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("아이디 " + userId + " 를 찾을 수 없습니다."));
 
-            BoardEntity boardEntity = boardRepository.findById(postId)
-                    .orElseThrow(() -> new RuntimeException("게시물 " + postId + " 를 찾을 수 없습니다."));
+        BoardEntity boardEntity = boardRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시물 " + postId + " 를 찾을 수 없습니다."));
 
-            boolean isExistsLikeEntity = likesRepository.existsByUserIdAndBoardId(userId, postId);
+        boolean isExistsLikeEntity = likesRepository.existsByUserIdAndBoardId(userId, postId);
 
-            if(isExistsLikeEntity) return ResponseEntity.status(HttpStatus.CONFLICT).body("ALREADY LIKE");
+        if (isExistsLikeEntity) return ResponseEntity.status(HttpStatus.CONFLICT).body("ALREADY LIKE");
 
-            LikesEntity likesEntity = LikesEntity.builder()
-                    .user(userEntity)
-                    .board(boardEntity)
-                    .build();
+        LikesEntity likesEntity = LikesEntity.builder()
+                .user(userEntity)
+                .board(boardEntity)
+                .build();
 
-            likesRepository.save(likesEntity);
+        likesRepository.save(likesEntity);
 
-            LikeResponse likeResponse = new LikeResponse();
-            likeResponse.setUserId(userId);
-            likeResponse.setBoardId(postId);
-            likeResponse.setMessage("LIKES UP");
+        LikeResponse likeResponse = new LikeResponse();
+        likeResponse.setUserId(userId);
+        likeResponse.setBoardId(postId);
+        likeResponse.setMessage("LIKES UP");
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(likeResponse);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(likeResponse);
 
-        if (method.equals("DELETE")) {
-            LikesEntity likesEntity = likesRepository.findByUserIdAndBoardId(userId, postId);
-            likesRepository.delete(likesEntity);
-
-            LikeResponse likeResponse = new LikeResponse();
-            likeResponse.setUserId(userId);
-            likeResponse.setBoardId(postId);
-            likeResponse.setMessage("LIKES DELETED");
-            log.info("likeResponse = " + likeResponse);
-
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(likeResponse);
-        }
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SYSTEM ERROR");
     }
 
-    public boolean likeStatus(Integer userId , Integer postId){
-        LikesEntity likesEntity = likesRepository.findByUserIdAndBoardId(userId , postId);
-        if (likesEntity == null){
+    public ResponseEntity<?> processLikeDown(Integer postId, Integer userId) {
+        LikesEntity likesEntity = likesRepository.findByUserIdAndBoardId(userId, postId);
+        likesRepository.delete(likesEntity);
+
+        LikeResponse likeResponse = new LikeResponse();
+        likeResponse.setUserId(userId);
+        likeResponse.setBoardId(postId);
+        likeResponse.setMessage("LIKES DELETED");
+        log.info("likeResponse = " + likeResponse);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(likeResponse);
+    }
+
+    public boolean likeStatus(Integer userId, Integer postId) {
+        LikesEntity likesEntity = likesRepository.findByUserIdAndBoardId(userId, postId);
+        if (likesEntity == null) {
             return false;
-        }else {
+        } else {
             return true;
         }
     }
